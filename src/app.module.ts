@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './modules/auth/auth.module';
 import { CarsModule } from './cars/cars.module';
 import {
   DATABASE_HOST,
@@ -11,8 +10,11 @@ import {
   DATABASE_PORT,
   DATABASE_USER_NAME,
 } from './enviroments';
+import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { PaymentsModule } from './payments/payments.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard } from './common/guards/acessToken.guard';
 
 @Module({
   imports: [
@@ -32,6 +34,13 @@ import { PaymentsModule } from './payments/payments.module';
     PaymentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -1,26 +1,87 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { AppException } from 'src/common/customs/custom.exception';
+import { ExceptionCode } from 'src/common/enums/exception_code';
+import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } from 'src/enviroments';
+import { UsersService } from 'src/modules/users/users.service';
+import {
+  JWT_ACCESS_TOKEN_EXPIRES_IN,
+  JWT_REFRESH_TOKEN_EXPIRES_IN,
+} from 'utils/contants';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
+
+  async login(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findUserByEmail(email);
+    if (!user) {
+      throw AppException.badRequestException({
+        code: ExceptionCode.BAD_REQUEST_CODE,
+        title: 'Validation Error',
+        message: 'Invalid email or password.',
+      });
+    }
+
+    console.log('user :' + pass + ' - pass: ' + user.password);
+
+    const isMatch = await bcrypt.compare(pass, user.password);
+    if (!isMatch) {
+      throw AppException.badRequestException({
+        code: ExceptionCode.BAD_REQUEST_CODE,
+        title: 'Validation Error',
+        message: 'Invalid email or password.',
+      });
+    }
+    const tokens = await this.getTokens(user.id, user.name);
+    return tokens;
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async getTokens(userId: number, username: string) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          sub: userId,
+          name: username,
+        },
+        {
+          secret: JWT_ACCESS_SECRET,
+          expiresIn: JWT_ACCESS_TOKEN_EXPIRES_IN,
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          sub: userId,
+          name: username,
+        },
+        {
+          secret: JWT_REFRESH_SECRET,
+          expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN,
+        },
+      ),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+  async refreshTokens(userId: number, refreshToken: string) {
+    const user = await this.usersService.findUserById(userId);
+    console.log(user + ' - ' + userId);
+    if (!user) {
+      throw AppException.forbiddenException({
+        code: ExceptionCode.FORBIDDEN_CODE,
+        message: 'Access Denied',
+      });
+    }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    const tokens = await this.getTokens(user.id, user.email);
+    return tokens;
   }
 }

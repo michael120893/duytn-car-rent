@@ -43,12 +43,20 @@ export class UsersService {
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  findAllUsers(): Promise<User[]> {
+    return this.userModel.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findUserById(id: number): Promise<User | null> {
+    return this.userModel.findByPk(id);
+  }
+
+  findUserByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({
+      where: {
+        email: email,
+      },
+    });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

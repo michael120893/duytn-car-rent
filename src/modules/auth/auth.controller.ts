@@ -2,20 +2,23 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Delete,
   Get,
-  Param,
-  Patch,
   Post,
+  Req,
+  UseGuards,
   UseInterceptors,
   UsePipes,
 } from '@nestjs/common';
 
+import { Request } from 'express';
+import { ResponseUtil } from 'src/common/customs/base.response';
+import { SkipAuth } from 'src/common/guards/acessToken.guard';
+import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
 import { CustomValidationPipe } from 'src/common/validations/pipes/validation.pipe';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
-import { UsersService } from '../users/users.service';
+import { UsersService } from 'src/modules/users/users.service';
 import { AuthService } from './auth.service';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { CreateAuthDto } from './dto/create-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +27,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
+  @SkipAuth()
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('register')
   @UsePipes(new CustomValidationPipe())
@@ -31,23 +35,26 @@ export class AuthController {
     return this.usersService.createUser(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @SkipAuth()
+  @Post('login')
+  signIn(@Body() signInDto: CreateAuthDto) {
+    return ResponseUtil.generateResponse({
+      response: this.authService.login(signInDto.username, signInDto.password),
+    });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Get('profile')
+  getProfile(@Req() req: Request): any {
+    return ResponseUtil.generateResponse({ response: req.user });
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @UseGuards(RefreshTokenGuard)
+  @Get('refresh')
+  async refreshTokens(@Req() req: Request) {
+    const userId = req.user['sub'];
+    const refreshToken = req.user['refreshToken'];
+    return ResponseUtil.generateResponse({
+      response: this.authService.refreshTokens(userId, refreshToken),
+    });
   }
 }

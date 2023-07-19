@@ -11,6 +11,9 @@ const DATABASE_PORT: number = parseInt(process.env.DATABASE_PORT);
 const REDIS_HOST: string = process.env.REDIS_HOST;
 const REDIS_PORT: number  = parseInt(process.env.REDIS_PORT);
 
+const JWT_ACCESS_SECRET: string  = process.env.JWT_ACCESS_SECRET;
+const JWT_REFRESH_SECRET: string  = process.env.JWT_REFRESH_SECRET;
+
 export {
     DATABASE_HOST,
     DATABASE_NAME,
@@ -19,6 +22,8 @@ export {
     DATABASE_USER_NAME,
     NODE_ENV,
     REDIS_HOST,
-    REDIS_PORT
+    REDIS_PORT,
+    JWT_ACCESS_SECRET,
+    JWT_REFRESH_SECRET
 };
 
