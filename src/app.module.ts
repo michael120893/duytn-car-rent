@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CarsModule } from './cars/cars.module';
+import { CarsModule } from './modules/cars/cars.module';
 import {
   DATABASE_HOST,
   DATABASE_NAME,
