@@ -1,8 +1,12 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CarsModule } from './modules/cars/cars.module';
+import { AccessTokenGuard } from './common/guards/acessToken.guard';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import {
   DATABASE_HOST,
   DATABASE_NAME,
@@ -11,10 +15,9 @@ import {
   DATABASE_USER_NAME,
 } from './enviroments';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
+import { CarsModule } from './modules/cars/cars.module';
 import { PaymentsModule } from './modules/payments/payments.module';
-import { APP_GUARD } from '@nestjs/core';
-import { AccessTokenGuard } from './common/guards/acessToken.guard';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -32,6 +35,21 @@ import { AccessTokenGuard } from './common/guards/acessToken.guard';
     CarsModule,
     AuthModule,
     PaymentsModule,
+    WinstonModule.forRootAsync({
+      useFactory: () => ({
+        transports: [
+          new winston.transports.Console(),
+          new winston.transports.File({
+            level: 'info',
+            filename: 'logs/application.log',
+            format: winston.format.combine(
+              winston.format.timestamp(),
+              winston.format.json(),
+            ),
+          }),
+        ],
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [
@@ -43,4 +61,8 @@ import { AccessTokenGuard } from './common/guards/acessToken.guard';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
