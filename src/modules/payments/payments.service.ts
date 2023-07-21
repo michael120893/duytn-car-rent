@@ -2,18 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Car } from 'models/car.entity';
 import { Payment } from 'models/payment.entity';
+import { PaymentMethod } from 'models/payment.method.entity';
+import { PaymentStatus } from 'models/payment.status.entity';
 import { Sequelize } from 'sequelize-typescript';
 import { AppException } from 'src/common/customs/custom.exception';
 import {
   Coupon as CouponEnum,
-  OrderStatus,
-  PaymenMethod,
-  PaymentStatus,
+  OrderStatus as OrderStatusEnum,
+  PaymenMethod as PaymenMethodEnum,
+  PaymentStatus as PaymentStatusEnum,
 } from 'src/common/enums/database.enum';
+import { ExceptionCode } from 'src/common/enums/exception_code';
 import { Coupon } from '../../../models/coupon.entity';
 import { Order } from '../../../models/order.entity';
-import { ExceptionCode } from 'src/common/enums/exception_code';
+import { Paging } from '../cars/dto/paging.dto';
 import { CreatePlaceOrderDto } from './dto/create-payment.dto';
+import { GetAllOrdersDto } from './dto/get-all-orders.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -24,6 +30,8 @@ export class PaymentsService {
     private carModel: typeof Car,
     @InjectModel(Order)
     private orderModel: typeof Order,
+    @InjectModel(Coupon)
+    private paymentModel: typeof Payment,
   ) {}
 
   async placeOrder(userId: number, createPlaceOrderDto: CreatePlaceOrderDto) {
@@ -37,14 +45,14 @@ export class PaymentsService {
         rawOrder.drop_off_location = createPlaceOrderDto.drop_off_location;
         rawOrder.pick_up_date = createPlaceOrderDto.pick_up_date;
         rawOrder.pick_up_location = createPlaceOrderDto.pick_up_location;
-        rawOrder.order_status_id = OrderStatus.Renting;
+        rawOrder.order_status_id = OrderStatusEnum.Renting;
         const order = await rawOrder.save({ transaction: t });
 
         const rawPayment = new Payment();
         rawPayment.order_id = order.id;
         rawPayment.user_id = userId;
-        rawPayment.payment_status_id = PaymentStatus.Pending;
-        rawPayment.payment_method_id = PaymenMethod.Cash;
+        rawPayment.payment_status_id = PaymentStatusEnum.Pending;
+        rawPayment.payment_method_id = PaymenMethodEnum.Cash;
 
         const car = await this.carModel.findOne({
           where: {
@@ -110,7 +118,7 @@ export class PaymentsService {
       OR ('${createPlaceOrderDto.drop_off_date}' BETWEEN orders.pick_up_date AND orders.drop_off_date) 
       OR (orders.pick_up_date BETWEEN '${createPlaceOrderDto.pick_up_date}' AND '${createPlaceOrderDto.drop_off_date}') 
       OR (orders.drop_off_date BETWEEN '${createPlaceOrderDto.pick_up_date}' AND '${createPlaceOrderDto.drop_off_date}')) 
-      and orders.order_status_id = ${OrderStatus.Renting}) = 0`);
+      and orders.order_status_id = ${OrderStatusEnum.Renting}) = 0`);
 
     return !!(await this.carModel.findOne({
       include: [
@@ -165,7 +173,74 @@ export class PaymentsService {
     return { total_rental_price: price };
   }
 
-  // update(id: number, updatePaymentDto: UpdatePaymentDto) {
-  //   return `This action updates a #${id} payment`;
-  // }
+  async findAllOrders(getAllOrdersDto: GetAllOrdersDto) {
+    const { limit, offset } = getAllOrdersDto;
+    const result = await this.orderModel.findAndCountAll({
+      include: {
+        model: Payment,
+        include: [PaymentMethod, PaymentStatus, Coupon],
+      },
+      limit: +limit,
+      offset: +offset,
+    });
+
+    return new Paging(result.rows, {
+      total: result.count,
+      limit: +limit,
+      offset: +offset,
+    });
+  }
+
+  async findOrder(id: number): Promise<Order> {
+    const order = await this.orderModel.findOne({
+      include: {
+        model: Payment,
+        include: [PaymentMethod, PaymentStatus, Coupon],
+      },
+      where: {
+        id: id,
+      },
+    });
+    if (order) return order;
+
+    throw AppException.notFoundException({
+      title: `order_id ${id} is not found`,
+    });
+  }
+
+  async updateOrder(id: number, updateOrder: UpdateOrderDto) {
+    const [affectedCount, affectedRows] = await this.orderModel.update(
+      {
+        order_status_id: updateOrder.order_status_id,
+      },
+      {
+        where: { id },
+        returning: true,
+      },
+    );
+    console.log('result: ' + affectedCount + ' ' + affectedRows);
+    if (!affectedRows) {
+      throw AppException.notFoundException({
+        title: `order_id ${id} is not found`,
+      });
+    }
+  }
+
+  async updatePayment(id: number, updatePayment: UpdatePaymentDto) {
+    const [affectedCount, affectedRows] = await this.paymentModel.update(
+      {
+        payment_status_id: updatePayment.payment_status_id,
+      },
+      {
+        where: { id },
+        returning: true,
+      },
+    );
+    console.log('result: ' + affectedCount + ' ' + affectedRows);
+    if (!affectedRows) {
+      throw AppException.notFoundException({
+        title: `payment_id ${id} is not found`,
+      });
+    }
+  }
 }

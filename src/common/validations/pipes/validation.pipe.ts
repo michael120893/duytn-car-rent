@@ -22,7 +22,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
           'An internal server error has occurred. If the problem persists, please contact us.',
         errors: errors.map((error) => ({
           code: ExceptionCode.VALIDATION_CODE,
-          field: 'error.property',
+          field: error.property,
           message: 'Object.values(error.constraints).toString()',
         })),
       });

@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { IsEndDateAfterStartDate } from "src/common/validations/validators/date.validator.constraints";
 
 export class CreatePlaceOrderDto {
@@ -26,5 +26,6 @@ export class CreatePlaceOrderDto {
     drop_off_location: String;
 
     @IsString()
-    coupon_code: String;
+    @IsOptional()
+    coupon_code?: String;
 }

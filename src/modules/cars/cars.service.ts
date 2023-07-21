@@ -8,12 +8,12 @@ import { CarType } from 'models/car.type.entity';
 import { Op } from 'sequelize';
 import { AppException } from 'src/common/customs/custom.exception';
 import { CarCapacity } from '../../../models/car.capacity.entity';
-import { UpdateCarDto } from './dto/update-car.dto';
 import { AddCarImageDto } from './dto/add-car-image.dto';
+import { CreateCarDto } from './dto/create-car.dto';
 import { GetAllCarsDto } from './dto/get-all-cars.dto';
 import { Paging } from './dto/paging.dto';
 import { ReviewCarDto } from './dto/review-car.dto';
-import { CreateCarDto } from './dto/create-car.dto';
+import { UpdateCarDto } from './dto/update-car.dto';
 @Injectable()
 export class CarsService {
   constructor(
@@ -82,16 +82,6 @@ export class CarsService {
   }
 
   async updateCar(id: number, updateCarDto: UpdateCarDto) {
-    const carUpdated = new Car();
-    carUpdated.car_type_id = updateCarDto.car_type_id;
-    carUpdated.car_steering_id = updateCarDto.car_steering_id;
-    carUpdated.car_capacity_id = updateCarDto.car_capacity_id;
-    carUpdated.name = updateCarDto.name;
-    carUpdated.description = updateCarDto.description;
-    carUpdated.gasoline = updateCarDto.gasoline;
-    carUpdated.price = updateCarDto.price;
-    carUpdated.original_price = updateCarDto.original_price;
-    carUpdated.licence_plates = updateCarDto.licence_plates;
     const [affectedCount, affectedRows] = await this.carsModel.update(
       {
         car_type_id: updateCarDto.car_type_id,
