@@ -18,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CarsModule } from './modules/cars/cars.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { UsersModule } from './modules/users/users.module';
+import { QueuesModule } from './queues/queues.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { UsersModule } from './modules/users/users.module';
         ],
       }),
     }),
+    QueuesModule,
   ],
   controllers: [AppController],
   providers: [

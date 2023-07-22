@@ -6,12 +6,14 @@ import { ExceptionCode } from 'src/common/enums/exception_code';
 import { User } from '../../../models/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { QueueService } from 'src/queues/queues.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
+    private readonly queueService: QueueService,
   ) {}
   async createUser(createUserDto: CreateUserDto) {
     try {
@@ -27,6 +29,12 @@ export class UsersService {
       const { password, ...result } = (await newUser.save()).get({
         plain: true,
       });
+      
+      this.queueService.sendRegisterAccountMail(
+        createUserDto.email,
+        createUserDto.name,
+        createUserDto.phone,
+      );
       return result;
     } catch (err) {
       if (

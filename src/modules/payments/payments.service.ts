@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Car } from 'models/car.entity';
+import { CarType } from 'models/car.type.entity';
 import { Payment } from 'models/payment.entity';
 import { PaymentMethod } from 'models/payment.method.entity';
 import { PaymentStatus } from 'models/payment.status.entity';
+import { User } from 'models/user.entity';
 import { Sequelize } from 'sequelize-typescript';
 import { AppException } from 'src/common/customs/custom.exception';
 import {
@@ -13,6 +15,7 @@ import {
   PaymentStatus as PaymentStatusEnum,
 } from 'src/common/enums/database.enum';
 import { ExceptionCode } from 'src/common/enums/exception_code';
+import { QueueService } from 'src/queues/queues.service';
 import { Coupon } from '../../../models/coupon.entity';
 import { Order } from '../../../models/order.entity';
 import { Paging } from '../cars/dto/paging.dto';
@@ -32,6 +35,9 @@ export class PaymentsService {
     private orderModel: typeof Order,
     @InjectModel(Coupon)
     private paymentModel: typeof Payment,
+    @InjectModel(User)
+    private userModel: typeof User,
+    private readonly queueService: QueueService,
   ) {}
 
   async placeOrder(userId: number, createPlaceOrderDto: CreatePlaceOrderDto) {
@@ -55,6 +61,7 @@ export class PaymentsService {
         rawPayment.payment_method_id = PaymenMethodEnum.Cash;
 
         const car = await this.carModel.findOne({
+          include: [CarType],
           where: {
             id: createPlaceOrderDto.car_id,
           },
@@ -79,6 +86,20 @@ export class PaymentsService {
         }
         rawPayment.price = price;
         const payment = await rawPayment.save({ transaction: t });
+
+        const user = await this.userModel.findByPk(userId, {
+          transaction: t,
+        });
+
+        this.queueService.sendPlaceOrderMail(
+          user.email,
+          user.name,
+          `${car.carType.type} - ${car.licence_plates}`,
+          order.pick_up_date.toString(),
+          order.drop_off_date.toString(),
+          price,
+          PaymenMethodEnum[1],
+        );
         await t.commit();
         return { order, payment };
       } else {
