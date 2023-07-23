@@ -10,7 +10,6 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common';
-import { ResponseUtil } from 'src/common/customs/base.response';
 import { CustomValidationPipe } from 'src/common/validations/pipes/validation.pipe';
 import { CarsService } from './cars.service';
 import { AddCarImageDto } from './dto/add-car-image.dto';
@@ -26,51 +25,39 @@ export class CarsController {
   @Post()
   @UsePipes(new CustomValidationPipe())
   createCar(@Body() createCarDto: CreateCarDto) {
-    return ResponseUtil.generateResponse({
-      response: this.carsService.createCar(createCarDto),
-    });
+    return this.carsService.createCar(createCarDto);
   }
 
   @Post('reviews')
   @UsePipes(new CustomValidationPipe())
   reviewCar(@Body() reviewCarDto: ReviewCarDto) {
-    return ResponseUtil.generateResponse({
-      response: this.carsService.reviewCar(reviewCarDto),
-    });
+    return this.carsService.reviewCar(reviewCarDto);
   }
 
   @Get()
   async findAllCar(@Query() getAllCarsDto: GetAllCarsDto) {
-    return { data: await this.carsService.findAllCars(getAllCarsDto) };
+    return await this.carsService.findAllCars(getAllCarsDto);
   }
 
   @Get(':id')
   findCar(@Param('id') id: number) {
-    return ResponseUtil.generateResponse({
-      response: this.carsService.findCar(id),
-    });
+    return this.carsService.findCar(id);
   }
 
   @Patch(':id')
   @HttpCode(204)
   update(@Param('id') id: string, @Body() updateCarDto: UpdateCarDto) {
-    return ResponseUtil.generateResponse({
-      response: this.carsService.updateCar(+id, updateCarDto),
-    });
+    return this.carsService.updateCar(+id, updateCarDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: number) {
-    return ResponseUtil.generateResponse({
-      response: this.carsService.removeCar(id),
-    });
+    return this.carsService.removeCar(id);
   }
 
   @Post('images')
   @UsePipes(new CustomValidationPipe())
   addCarImage(@Body() addCarImageDto: AddCarImageDto) {
-    return ResponseUtil.generateResponse({
-      response: this.carsService.addCarImage(addCarImageDto),
-    });
+    return this.carsService.addCarImage(addCarImageDto);
   }
 }

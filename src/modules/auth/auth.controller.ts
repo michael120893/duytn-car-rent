@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 
 import { Request } from 'express';
-import { ResponseUtil } from 'src/common/customs/base.response';
 import { SkipAuth } from 'src/common/guards/acessToken.guard';
 import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
 import { CustomValidationPipe } from 'src/common/validations/pipes/validation.pipe';
@@ -38,14 +37,12 @@ export class AuthController {
   @SkipAuth()
   @Post('login')
   signIn(@Body() signInDto: CreateAuthDto) {
-    return ResponseUtil.generateResponse({
-      response: this.authService.login(signInDto.username, signInDto.password),
-    });
+    return this.authService.login(signInDto.username, signInDto.password);
   }
 
   @Get('profile')
   getProfile(@Req() req: Request): any {
-    return ResponseUtil.generateResponse({ response: req.user });
+    return req.user;
   }
 
   @UseGuards(RefreshTokenGuard)
@@ -53,8 +50,6 @@ export class AuthController {
   async refreshTokens(@Req() req: Request) {
     const userId = req.user['sub'];
     const refreshToken = req.user['refreshToken'];
-    return ResponseUtil.generateResponse({
-      response: this.authService.refreshTokens(userId, refreshToken),
-    });
+    return this.authService.refreshTokens(userId, refreshToken);
   }
 }

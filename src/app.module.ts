@@ -1,11 +1,12 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccessTokenGuard } from './common/guards/acessToken.guard';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import {
   DATABASE_HOST,
@@ -60,6 +61,10 @@ import { QueuesModule } from './queues/queues.module';
     {
       provide: APP_GUARD,
       useClass: AccessTokenGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
     },
   ],
 })
