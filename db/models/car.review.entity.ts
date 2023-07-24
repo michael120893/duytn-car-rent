@@ -1,6 +1,6 @@
 import { AutoIncrement, BelongsTo, Column, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { User } from "models/user.entity";
 import { Car } from "./car.entity";
+import { User } from "./user.entity";
 @Table({tableName:'CarReviews'})
 export class CarReview extends Model {
     @AutoIncrement

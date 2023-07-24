@@ -8,7 +8,7 @@ import { UsersService } from 'src/modules/users/users.service';
 import {
   JWT_ACCESS_TOKEN_EXPIRES_IN,
   JWT_REFRESH_TOKEN_EXPIRES_IN,
-} from 'utils/contants';
+} from 'src/common/utils/contants';
 
 @Injectable()
 export class AuthService {

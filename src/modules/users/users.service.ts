@@ -3,10 +3,10 @@ import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 import { AppException } from 'src/common/customs/custom.exception';
 import { ExceptionCode } from 'src/common/enums/exception_code';
-import { User } from '../../../models/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueueService } from 'src/queues/queues.service';
+import { User } from 'db/models/user.entity';
 
 @Injectable()
 export class UsersService {

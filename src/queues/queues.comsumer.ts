@@ -10,7 +10,7 @@ import {
     EMAIL_QUEUE,
     PLACE_ORDER_EMAIL,
     REGISTER_ACCOUNT_EMAIL,
-} from 'utils/contants';
+} from 'src/common/utils/contants';
 
 @Processor(EMAIL_QUEUE)
 export class QueueConsumer {

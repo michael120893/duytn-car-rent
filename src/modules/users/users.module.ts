@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { UserInfo } from 'models/user.info.entity';
 import { QueuesModule } from 'src/queues/queues.module';
-import { User } from '../../../models/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { User } from 'db/models/user.entity';
+import { UserInfo } from 'db/models/user.info.entity';
 
 @Module({
   imports: [SequelizeModule.forFeature([User, UserInfo]), QueuesModule],

@@ -1,9 +1,9 @@
 import { Exclude } from "class-transformer";
 import { AutoIncrement, Column, HasMany, HasOne, Model, PrimaryKey, Table, Unique } from "sequelize-typescript";
 
-import { Order } from "models/order.entity";
 import { CarReview } from "./car.review.entity";
 import { UserInfo } from "./user.info.entity";
+import { Order } from "./order.entity";
 
 @Table({ tableName: 'Users' })
 export class User extends Model<User> {

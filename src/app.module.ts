@@ -16,6 +16,7 @@ import {
   DATABASE_USER_NAME,
 } from './enviroments';
 import { AuthModule } from './modules/auth/auth.module';
+import { CacheRedisModule } from './modules/cache/cache.redis.module';
 import { CarsModule } from './modules/cars/cars.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { UsersModule } from './modules/users/users.module';
@@ -53,10 +54,10 @@ import { QueuesModule } from './queues/queues.module';
       }),
     }),
     QueuesModule,
+    CacheRedisModule,
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     AppService,
     {
       provide: APP_GUARD,

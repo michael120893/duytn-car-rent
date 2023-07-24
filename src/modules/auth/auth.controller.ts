@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  HttpCode,
   Post,
   Req,
   UseGuards,
@@ -16,6 +17,7 @@ import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
 import { CustomValidationPipe } from 'src/common/validations/pipes/validation.pipe';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { UsersService } from 'src/modules/users/users.service';
+import { CacheRedisService } from '../cache/cache.redis.service';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 
@@ -24,6 +26,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
+    private readonly cacheRedisService: CacheRedisService,
   ) {}
 
   @SkipAuth()
@@ -36,8 +39,14 @@ export class AuthController {
 
   @SkipAuth()
   @Post('login')
-  signIn(@Body() signInDto: CreateAuthDto) {
+  login(@Body() signInDto: CreateAuthDto) {
     return this.authService.login(signInDto.username, signInDto.password);
+  }
+
+  @Post('logout')
+  @HttpCode(204)
+  logout(@Req() req: Request) {
+   return this.cacheRedisService.setTokenToBlackList(req.user['accessToken']);
   }
 
   @Get('profile')

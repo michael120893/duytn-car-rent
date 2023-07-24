@@ -1,7 +1,7 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { REDIS_HOST, REDIS_PORT } from 'src/enviroments';
-import { EMAIL_QUEUE } from 'utils/contants';
+import { EMAIL_QUEUE } from 'src/common/utils/contants';
 import { QueueConsumer } from './queues.comsumer';
 import { QueueService } from './queues.service';
 
