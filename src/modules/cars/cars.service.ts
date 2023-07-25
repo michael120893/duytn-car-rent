@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { CarCapacity } from 'db/models/car.capacity.entity';
+import { Car } from 'db/models/car.entity';
+import { CarImage } from 'db/models/car.image.entity';
+import { CarReview } from 'db/models/car.review.entity';
+import { CarSteering } from 'db/models/car.steering.entity';
+import { CarType } from 'db/models/car.type.entity';
 import { Op } from 'sequelize';
 import { AppException } from 'src/common/customs/custom.exception';
 import { AddCarImageDto } from './dto/add-car-image.dto';
@@ -8,12 +14,6 @@ import { GetAllCarsDto } from './dto/get-all-cars.dto';
 import { Paging } from './dto/paging.dto';
 import { ReviewCarDto } from './dto/review-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
-import { CarCapacity } from 'db/models/car.capacity.entity';
-import { Car } from 'db/models/car.entity';
-import { CarImage } from 'db/models/car.image.entity';
-import { CarReview } from 'db/models/car.review.entity';
-import { CarSteering } from 'db/models/car.steering.entity';
-import { CarType } from 'db/models/car.type.entity';
 @Injectable()
 export class CarsService {
   constructor(
@@ -67,7 +67,7 @@ export class CarsService {
     });
   }
 
-  async findCar(id: number): Promise<Car> {
+  async findCarById(id: number): Promise<Car> {
     const car = await this.carsModel.findOne({
       include: [CarSteering, CarCapacity, CarType, CarReview, CarImage],
       where: {
@@ -82,7 +82,14 @@ export class CarsService {
   }
 
   async updateCar(id: number, updateCarDto: UpdateCarDto) {
-    const [affectedCount, affectedRows] = await this.carsModel.update(
+    const car = await this.findCarById(id);
+    if (!car) {
+      throw AppException.notFoundException({
+        title: `car_id ${id} is not found`,
+      });
+    }
+
+    await this.carsModel.update(
       {
         car_type_id: updateCarDto.car_type_id,
         car_steering_id: updateCarDto.car_steering_id,
@@ -99,15 +106,15 @@ export class CarsService {
         returning: true,
       },
     );
-    console.log('result: ' + affectedCount + ' ' + affectedRows);
-    if (!affectedRows) {
+  }
+
+  async removeCar(id: number) {
+    const car = await this.findCarById(id);
+    if (!car) {
       throw AppException.notFoundException({
         title: `car_id ${id} is not found`,
       });
     }
-  }
-
-  removeCar(id: number) {
     this.carsModel.destroy({
       where: {
         id: id,

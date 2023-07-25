@@ -3,10 +3,12 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
+  HttpCode,
   Patch,
   Post,
+  Req
 } from '@nestjs/common';
+import { Request } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
@@ -25,18 +27,19 @@ export class UsersController {
     return this.usersService.findAllUsers();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findUserById(+id);
+  @Get('profile')
+  findOne(@Req() req: Request) {
+    return this.usersService.findUserById(req.user['sub']);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Patch()
+  @HttpCode(204)
+  update(@Req() req: Request, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateUser(req.user['sub'], updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  remove(@Req() req: Request) {
+    return this.usersService.removeUser(req.user['sub']);
   }
 }

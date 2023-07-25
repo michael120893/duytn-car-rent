@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
+import { User } from 'db/models/user.entity';
 import { AppException } from 'src/common/customs/custom.exception';
 import { ExceptionCode } from 'src/common/enums/exception_code';
+import { QueueService } from 'src/queues/queues.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { QueueService } from 'src/queues/queues.service';
-import { User } from 'db/models/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +29,7 @@ export class UsersService {
       const { password, ...result } = (await newUser.save()).get({
         plain: true,
       });
-      
+
       this.queueService.sendRegisterAccountMail(
         createUserDto.email,
         createUserDto.name,
@@ -56,7 +56,11 @@ export class UsersService {
   }
 
   findUserById(id: number): Promise<User | null> {
-    return this.userModel.findByPk(id);
+    return this.userModel.findByPk(id, {
+      attributes: {
+        exclude: ['password'],
+      },
+    });
   }
 
   findUserByEmail(email: string): Promise<User | null> {
@@ -67,11 +71,39 @@ export class UsersService {
     });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async updateUser(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw AppException.notFoundException({
+        title: `user_id ${id} is not found`,
+      });
+    }
+
+    await this.userModel.update(
+      {
+        name: updateUserDto.name,
+        phone: updateUserDto.phone,
+        avatar_url: updateUserDto.avatar_url,
+      },
+      {
+        where: { id },
+        returning: true,
+      },
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async removeUser(id: number) {
+    const user = await this.findUserById(id);
+    if (!user) {
+      throw AppException.notFoundException({
+        title: `user_id ${id} is not found`,
+      });
+    }
+
+    this.userModel.destroy({
+      where: {
+        id: id,
+      },
+    });
   }
 }

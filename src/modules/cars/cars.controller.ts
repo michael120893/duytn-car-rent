@@ -41,7 +41,7 @@ export class CarsController {
 
   @Get(':id')
   findCar(@Param('id') id: number) {
-    return this.carsService.findCar(id);
+    return this.carsService.findCarById(id);
   }
 
   @Patch(':id')
