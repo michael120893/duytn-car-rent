@@ -20,7 +20,7 @@ import { CacheRedisModule } from './modules/cache/cache.redis.module';
 import { CarsModule } from './modules/cars/cars.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { UsersModule } from './modules/users/users.module';
-import { QueuesModule } from './queues/queues.module';
+import { QueuesModule } from './modules/queues/queues.module';
 
 @Module({
   imports: [

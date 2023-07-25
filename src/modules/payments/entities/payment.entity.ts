@@ -3,7 +3,7 @@ import { PaymentStatus } from "./payment.status.entity";
 import { PaymentMethod } from "./payment.method.entity";
 import { Coupon } from "./coupon.entity";
 import { Order } from "./order.entity";
-import { User } from "./user.entity";
+import { User } from "../../users/entities/user.entity";
 
 @Table({tableName:'Payments'})
 export class Payment extends Model {

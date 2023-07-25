@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
-import { User } from 'db/models/user.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 import { AppException } from 'src/common/customs/custom.exception';
 import { ExceptionCode } from 'src/common/enums/exception_code';
-import { QueueService } from 'src/queues/queues.service';
+import { QueueService } from 'src/modules/queues/queues.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 

@@ -1,11 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { CarCapacity } from 'db/models/car.capacity.entity';
-import { Car } from 'db/models/car.entity';
-import { CarImage } from 'db/models/car.image.entity';
-import { CarReview } from 'db/models/car.review.entity';
-import { CarSteering } from 'db/models/car.steering.entity';
-import { CarType } from 'db/models/car.type.entity';
+import { CarCapacity } from 'src/modules/cars/entities/car.capacity.entity';
 import { Op } from 'sequelize';
 import { AppException } from 'src/common/customs/custom.exception';
 import { AddCarImageDto } from './dto/add-car-image.dto';
@@ -14,6 +9,11 @@ import { GetAllCarsDto } from './dto/get-all-cars.dto';
 import { Paging } from './dto/paging.dto';
 import { ReviewCarDto } from './dto/review-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
+import { Car } from './entities/car.entity';
+import { CarImage } from './entities/car.image.entity';
+import { CarReview } from './entities/car.review.entity';
+import { CarSteering } from './entities/car.steering.entity';
+import { CarType } from './entities/car.type.entity';
 @Injectable()
 export class CarsService {
   constructor(

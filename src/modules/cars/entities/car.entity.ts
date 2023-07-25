@@ -4,7 +4,7 @@ import { CarImage } from "./car.image.entity";
 import { CarReview } from "./car.review.entity";
 import { CarSteering } from "./car.steering.entity";
 import { CarType } from "./car.type.entity";
-import { Order } from "./order.entity";
+import { Order } from "src/modules/payments/entities/order.entity";
 @Table({tableName:'Cars'})
 export class Car extends Model<Car>{
     @AutoIncrement

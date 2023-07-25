@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Car } from 'db/models/car.entity';
-import { CarType } from 'db/models/car.type.entity';
-import { Coupon } from 'db/models/coupon.entity';
-import { Order } from 'db/models/order.entity';
-import { Payment } from 'db/models/payment.entity';
-import { PaymentMethod } from 'db/models/payment.method.entity';
-import { PaymentStatus } from 'db/models/payment.status.entity';
-import { User } from 'db/models/user.entity';
+import { Coupon } from 'src/modules/payments/entities/coupon.entity';
+import { Order } from 'src/modules/payments/entities/order.entity';
+import { Payment } from 'src/modules/payments/entities/payment.entity';
+import { User } from 'src/modules/users/entities/user.entity';
 import { Sequelize } from 'sequelize-typescript';
 import { AppException } from 'src/common/customs/custom.exception';
 import {
@@ -17,12 +13,16 @@ import {
   PaymentStatus as PaymentStatusEnum,
 } from 'src/common/enums/database.enum';
 import { ExceptionCode } from 'src/common/enums/exception_code';
-import { QueueService } from 'src/queues/queues.service';
+import { QueueService } from 'src/modules/queues/queues.service';
 import { Paging } from '../cars/dto/paging.dto';
 import { CreatePlaceOrderDto } from './dto/create-payment.dto';
 import { GetAllOrdersDto } from './dto/get-all-orders.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { Car } from '../cars/entities/car.entity';
+import { PaymentMethod } from './entities/payment.method.entity';
+import { PaymentStatus } from './entities/payment.status.entity';
+import { CarType } from '../cars/entities/car.type.entity';
 @Injectable()
 export class PaymentsService {
   constructor(

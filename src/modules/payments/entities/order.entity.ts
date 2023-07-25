@@ -1,9 +1,9 @@
 import { AutoIncrement, BelongsTo, Column, ForeignKey, HasOne, Model, PrimaryKey, Table } from "sequelize-typescript";
 
-import { Car } from "./car.entity";
 import { Payment } from "./payment.entity";
 import { OrderStatus } from "./order.status.entity";
-import { User } from "./user.entity";
+import { User } from "../../users/entities/user.entity";
+import { Car } from "src/modules/cars/entities/car.entity";
 
 @Table({tableName:'Orders'})
 export class Order extends Model {
