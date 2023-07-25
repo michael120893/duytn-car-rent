@@ -1,16 +1,23 @@
-import { AutoIncrement, Column, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { Payment } from "./payment.entity";
+import {
+  AutoIncrement,
+  Column,
+  HasMany,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { Payment } from './payment.entity';
 
-@Table({tableName:'PaymentStatuses'})
+@Table({ tableName: 'PaymentStatuses' })
 export class PaymentStatus extends Model {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id: number;
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  id: number;
 
-    @Column
-    status: String;
+  @Column
+  status: String;
 
-    @HasMany(() => Payment)
-    payments: Payment[]
+  @HasMany(() => Payment)
+  payments: Payment[];
 }

@@ -1,11 +1,10 @@
 import {
-    AutoIncrement,
-    Column,
-    Model,
-    PrimaryKey,
-    Table
+  AutoIncrement,
+  Column,
+  Model,
+  PrimaryKey,
+  Table,
 } from 'sequelize-typescript';
-
 
 @Table({ tableName: 'OrderStatuses' })
 export class OrderStatus extends Model {

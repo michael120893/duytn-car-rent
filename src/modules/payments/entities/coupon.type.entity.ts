@@ -1,16 +1,23 @@
-import { AutoIncrement, Column, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { Coupon } from "./coupon.entity";
+import {
+  AutoIncrement,
+  Column,
+  HasMany,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { Coupon } from './coupon.entity';
 
-@Table({tableName:'CouponTypes'})
+@Table({ tableName: 'CouponTypes' })
 export class CouponType extends Model {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id: number;
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  id: number;
 
-    @Column
-    type: String;
+  @Column
+  type: String;
 
-    @HasMany(() => Coupon)
-    coupons: Coupon[]
+  @HasMany(() => Coupon)
+  coupons: Coupon[];
 }

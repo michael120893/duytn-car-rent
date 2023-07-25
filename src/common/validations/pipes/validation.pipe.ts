@@ -16,7 +16,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
     const errors = await validate(object);
     if (errors.length > 0) {
       throw AppException.badRequestException({
-        code:ExceptionCode.VALIDATION_CODE,
+        code: ExceptionCode.VALIDATION_CODE,
         title: 'System error',
         message:
           'An internal server error has occurred. If the problem persists, please contact us.',
