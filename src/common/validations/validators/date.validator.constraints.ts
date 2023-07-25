@@ -1,8 +1,15 @@
-import { ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, registerDecorator } from 'class-validator';
+import {
+  ValidationArguments,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  registerDecorator,
+} from 'class-validator';
 
 @ValidatorConstraint({ name: 'IsEndDateAfterStartDate', async: false })
-export class IsEndDateAfterStartDateConstraint implements ValidatorConstraintInterface {
-
+export class IsEndDateAfterStartDateConstraint
+  implements ValidatorConstraintInterface
+{
   validate(endDate: any, args: ValidationArguments) {
     const startDate = args.object[args.constraints[0]]; // Retrieve the start date from the object
     return endDate >= startDate;
@@ -13,9 +20,10 @@ export class IsEndDateAfterStartDateConstraint implements ValidatorConstraintInt
   }
 }
 
-
-
-export function IsEndDateAfterStartDate(property: string, validationOptions?: ValidationOptions) {
+export function IsEndDateAfterStartDate(
+  property: string,
+  validationOptions?: ValidationOptions,
+) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       name: 'IsEndDateAfterStartDate',

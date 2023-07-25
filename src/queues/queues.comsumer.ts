@@ -1,15 +1,15 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
 import {
-    SENDGRID_API_KEY,
-    SENDGRID_PLACE_ORDER_TEMPLATE_ID,
-    SENDGRID_REGISTER_ACCOUNT_TEMPLATE_ID,
-    SENDGRID_SUPPORT_EMAIL,
+  SENDGRID_API_KEY,
+  SENDGRID_PLACE_ORDER_TEMPLATE_ID,
+  SENDGRID_REGISTER_ACCOUNT_TEMPLATE_ID,
+  SENDGRID_SUPPORT_EMAIL,
 } from 'src/enviroments';
 import {
-    EMAIL_QUEUE,
-    PLACE_ORDER_EMAIL,
-    REGISTER_ACCOUNT_EMAIL,
+  EMAIL_QUEUE,
+  PLACE_ORDER_EMAIL,
+  REGISTER_ACCOUNT_EMAIL,
 } from 'src/common/utils/contants';
 
 @Processor(EMAIL_QUEUE)

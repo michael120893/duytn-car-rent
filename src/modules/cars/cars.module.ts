@@ -11,9 +11,16 @@ import { CarType } from 'db/models/car.type.entity';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Car, CarCapacity, CarType, CarReview, CarImage, CarSteering]),
+    SequelizeModule.forFeature([
+      Car,
+      CarCapacity,
+      CarType,
+      CarReview,
+      CarImage,
+      CarSteering,
+    ]),
   ],
   controllers: [CarsController],
-  providers: [CarsService]
+  providers: [CarsService],
 })
 export class CarsModule {}

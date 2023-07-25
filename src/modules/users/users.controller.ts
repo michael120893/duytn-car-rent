@@ -6,7 +6,7 @@ import {
   HttpCode,
   Patch,
   Post,
-  Req
+  Req,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CreateUserDto } from './dto/create-user.dto';

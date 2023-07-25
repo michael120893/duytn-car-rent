@@ -46,7 +46,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(204)
   logout(@Req() req: Request) {
-   return this.cacheRedisService.setTokenToBlackList(req.user['accessToken']);
+    return this.cacheRedisService.setTokenToBlackList(req.user['accessToken']);
   }
 
   @Get('profile')
@@ -54,6 +54,7 @@ export class AuthController {
     return req.user;
   }
 
+  @SkipAuth()
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
   async refreshTokens(@Req() req: Request) {
