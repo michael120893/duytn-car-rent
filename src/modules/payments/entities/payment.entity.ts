@@ -14,7 +14,7 @@ import { Order } from './order.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Table({ tableName: 'Payments' })
-export class Payment extends Model {
+export class Payyyment extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column

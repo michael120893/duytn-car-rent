@@ -18,9 +18,10 @@ import {
 import { AuthModule } from './modules/auth/auth.module';
 import { CacheRedisModule } from './modules/cache/cache.redis.module';
 import { CarsModule } from './modules/cars/cars.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
-import { UsersModule } from './modules/users/users.module';
 import { QueuesModule } from './modules/queues/queues.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { QueuesModule } from './modules/queues/queues.module';
     }),
     QueuesModule,
     CacheRedisModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [

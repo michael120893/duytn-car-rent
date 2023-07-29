@@ -10,7 +10,7 @@ import {
   Unique,
 } from 'sequelize-typescript';
 import { CouponType } from './coupon.type.entity';
-import { Payment } from './payment.entity';
+import { Order } from './order.entity';
 
 @Table({ tableName: 'Coupons' })
 export class Coupon extends Model {
@@ -42,6 +42,6 @@ export class Coupon extends Model {
   @Column
   description: String;
 
-  @HasMany(() => Payment)
-  payments: Payment[];
+  @HasMany(() => Order)
+  orders: Order[];
 }

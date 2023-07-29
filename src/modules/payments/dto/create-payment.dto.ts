@@ -16,9 +16,6 @@ export class CreatePlaceOrderDto {
   @IsNotEmpty()
   pick_up_date: Date;
 
-  @IsNotEmpty()
-  pick_up_location: String;
-
   @IsEndDateAfterStartDate('pick_up_date', {
     message: 'drop_off_date must be larger than pick_up_date',
   })
@@ -26,10 +23,31 @@ export class CreatePlaceOrderDto {
   @IsNotEmpty()
   drop_off_date: Date;
 
-  @IsNotEmpty()
-  drop_off_location: String;
-
   @IsString()
   @IsOptional()
-  coupon_code?: String;
+  coupon_code?: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  pick_up_city_id: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  drop_off_city_id: number;
+
+  @IsString()
+  @IsNotEmpty()
+  billing_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  billing_phone_number: string;
+
+  @IsString()
+  @IsNotEmpty()
+  billing_address: string;
+
+  @IsString()
+  @IsNotEmpty()
+  billing_city: string;
 }

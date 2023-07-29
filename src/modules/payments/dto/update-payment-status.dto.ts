@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class UpdateOrderDto {
+export class UpdatePaymentStatusDto {
   @IsNumber()
   @IsNotEmpty()
-  order_status_id: number;
+  payment_status_id: number;
 }

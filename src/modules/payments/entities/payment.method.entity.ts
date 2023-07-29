@@ -6,7 +6,7 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { Payment } from './payment.entity';
+import { Order } from './order.entity';
 
 @Table({ tableName: 'PaymentMethods' })
 export class PaymentMethod extends Model {
@@ -18,6 +18,6 @@ export class PaymentMethod extends Model {
   @Column
   method: String;
 
-  @HasMany(() => Payment)
-  payments: Payment[];
+  @HasMany(() => Order)
+  orders: Order[];
 }

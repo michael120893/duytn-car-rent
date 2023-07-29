@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Coupon } from 'src/modules/payments/entities/coupon.entity';
-import { Order } from 'src/modules/payments/entities/order.entity';
-import { Payment } from 'src/modules/payments/entities/payment.entity';
-import { User } from 'src/modules/users/entities/user.entity';
+import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { AppException } from 'src/common/customs/custom.exception';
 import {
@@ -13,16 +10,13 @@ import {
   PaymentStatus as PaymentStatusEnum,
 } from 'src/common/enums/database.enum';
 import { ExceptionCode } from 'src/common/enums/exception_code';
+import { Coupon } from 'src/modules/payments/entities/coupon.entity';
+import { Order } from 'src/modules/payments/entities/order.entity';
 import { QueueService } from 'src/modules/queues/queues.service';
-import { Paging } from '../cars/dto/paging.dto';
-import { CreatePlaceOrderDto } from './dto/create-payment.dto';
-import { GetAllOrdersDto } from './dto/get-all-orders.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { User } from 'src/modules/users/entities/user.entity';
 import { Car } from '../cars/entities/car.entity';
-import { PaymentMethod } from './entities/payment.method.entity';
-import { PaymentStatus } from './entities/payment.status.entity';
 import { CarType } from '../cars/entities/car.type.entity';
+import { CreatePlaceOrderDto } from './dto/create-payment.dto';
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -33,8 +27,6 @@ export class PaymentsService {
     private carModel: typeof Car,
     @InjectModel(Order)
     private orderModel: typeof Order,
-    @InjectModel(Coupon)
-    private paymentModel: typeof Payment,
     @InjectModel(User)
     private userModel: typeof User,
     private readonly queueService: QueueService,
@@ -48,17 +40,19 @@ export class PaymentsService {
         rawOrder.user_id = userId;
         rawOrder.car_id = createPlaceOrderDto.car_id;
         rawOrder.drop_off_date = createPlaceOrderDto.drop_off_date;
-        rawOrder.drop_off_location = createPlaceOrderDto.drop_off_location;
+        rawOrder.drop_off_city_id = createPlaceOrderDto.drop_off_city_id;
         rawOrder.pick_up_date = createPlaceOrderDto.pick_up_date;
-        rawOrder.pick_up_location = createPlaceOrderDto.pick_up_location;
-        rawOrder.order_status_id = OrderStatusEnum.Renting;
-        const order = await rawOrder.save({ transaction: t });
+        rawOrder.pick_up_city_id = createPlaceOrderDto.pick_up_city_id;
 
-        const rawPayment = new Payment();
-        rawPayment.order_id = order.id;
-        rawPayment.user_id = userId;
-        rawPayment.payment_status_id = PaymentStatusEnum.Pending;
-        rawPayment.payment_method_id = PaymenMethodEnum.Cash;
+        rawOrder.order_status_id = OrderStatusEnum.Renting;
+        rawOrder.payment_status_id = PaymentStatusEnum.Pending;
+        rawOrder.payment_method_id = PaymenMethodEnum.Cash;
+
+        rawOrder.billing_name = createPlaceOrderDto.billing_name;
+        rawOrder.billing_phone_number =
+          createPlaceOrderDto.billing_phone_number;
+        rawOrder.billing_address = createPlaceOrderDto.billing_address;
+        rawOrder.billing_city = createPlaceOrderDto.billing_city;
 
         const car = await this.carModel.findOne({
           include: [CarType],
@@ -67,7 +61,8 @@ export class PaymentsService {
           },
           transaction: t,
         });
-        let price = car.price;
+        let subtotal = car.price;
+        let discount = 0;
 
         if (createPlaceOrderDto.coupon_code) {
           const coupon = await this.couponModel.findOne({
@@ -77,19 +72,22 @@ export class PaymentsService {
           });
           if (coupon) {
             if (coupon.id === CouponEnum.Percentage) {
-              price = price - (price * coupon.discount_value) / 100;
+              discount = (subtotal * coupon.discount_value) / 100;
             } else if (coupon.id === CouponEnum.FixedAmount) {
-              price = price - coupon.discount_value;
+              discount = coupon.discount_value;
             }
-            rawPayment.coupon_id = coupon.id;
+            rawOrder.coupon_id = coupon.id;
           }
         }
-        rawPayment.price = price;
-        const payment = await rawPayment.save({ transaction: t });
+        rawOrder.sub_total = subtotal;
+        rawOrder.discount = discount;
+        rawOrder.total = subtotal - discount;
 
         const user = await this.userModel.findByPk(userId, {
           transaction: t,
         });
+
+        const order = await rawOrder.save({ transaction: t });
 
         this.queueService.sendPlaceOrderMail(
           user.email,
@@ -97,11 +95,11 @@ export class PaymentsService {
           `${car.carType.type} - ${car.licence_plates}`,
           order.pick_up_date.toString(),
           order.drop_off_date.toString(),
-          price,
+          subtotal - discount,
           PaymenMethodEnum[1],
         );
         await t.commit();
-        return { order, payment };
+        return order;
       } else {
         throw AppException.badRequestException({
           code: ExceptionCode.BAD_REQUEST_CODE,
@@ -146,19 +144,11 @@ export class PaymentsService {
         {
           model: Order,
           required: true,
-          include: [
-            {
-              model: Payment,
-              required: true,
-              where: {
-                literalValue,
-              },
-            },
-          ],
         },
       ],
       where: {
         id: createPlaceOrderDto.car_id,
+        [Op.and]: [literalValue],
       },
     }));
   }
@@ -175,7 +165,8 @@ export class PaymentsService {
       });
     }
 
-    let price = car.price;
+    let subtotal = car.price;
+    let discount = 0;
 
     if (createPlaceOrderDto.coupon_code) {
       const coupon = await this.couponModel.findOne({
@@ -185,83 +176,16 @@ export class PaymentsService {
       });
       if (coupon) {
         if (coupon.id === CouponEnum.Percentage) {
-          price = price - (price * coupon.discount_value) / 100;
+          discount = (subtotal * coupon.discount_value) / 100;
         } else if (coupon.id === CouponEnum.FixedAmount) {
-          price = price - coupon.discount_value;
+          discount = coupon.discount_value;
         }
       }
     }
-    return { total_rental_price: price };
-  }
-
-  async findAllOrders(getAllOrdersDto: GetAllOrdersDto) {
-    const { limit, offset } = getAllOrdersDto;
-    const result = await this.orderModel.findAndCountAll({
-      include: {
-        model: Payment,
-        include: [PaymentMethod, PaymentStatus, Coupon],
-      },
-      limit: +limit,
-      offset: +offset,
-    });
-
-    return new Paging(result.rows, {
-      total: result.count,
-      limit: +limit,
-      offset: +offset,
-    });
-  }
-
-  async findOrder(id: number): Promise<Order> {
-    const order = await this.orderModel.findOne({
-      include: {
-        model: Payment,
-        include: [PaymentMethod, PaymentStatus, Coupon],
-      },
-      where: {
-        id: id,
-      },
-    });
-    if (order) return order;
-
-    throw AppException.notFoundException({
-      title: `order_id ${id} is not found`,
-    });
-  }
-
-  async updateOrder(id: number, updateOrder: UpdateOrderDto) {
-    const [affectedCount, affectedRows] = await this.orderModel.update(
-      {
-        order_status_id: updateOrder.order_status_id,
-      },
-      {
-        where: { id },
-        returning: true,
-      },
-    );
-    console.log('result: ' + affectedCount + ' ' + affectedRows);
-    if (!affectedRows) {
-      throw AppException.notFoundException({
-        title: `order_id ${id} is not found`,
-      });
-    }
-  }
-
-  async updatePayment(id: number, updatePayment: UpdatePaymentDto) {
-    const [affectedCount, affectedRows] = await this.paymentModel.update(
-      {
-        payment_status_id: updatePayment.payment_status_id,
-      },
-      {
-        where: { id },
-        returning: true,
-      },
-    );
-    console.log('result: ' + affectedCount + ' ' + affectedRows);
-    if (!affectedRows) {
-      throw AppException.notFoundException({
-        title: `payment_id ${id} is not found`,
-      });
-    }
+    return {
+      sub_total: subtotal,
+      discount: discount,
+      total: subtotal - discount,
+    };
   }
 }

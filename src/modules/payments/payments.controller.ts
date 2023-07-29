@@ -14,8 +14,8 @@ import { Request } from 'express';
 import { CustomValidationPipe } from 'src/common/validations/pipes/validation.pipe';
 import { CreatePlaceOrderDto } from './dto/create-payment.dto';
 import { GetAllOrdersDto } from './dto/get-all-orders.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
 import { PaymentsService } from './payments.service';
 @Controller('payments')
 export class PaymentsController {
@@ -33,30 +33,5 @@ export class PaymentsController {
     @Body() createPaymentDto: CreatePlaceOrderDto,
   ) {
     return this.paymentsService.placeOrder(req.user['sub'], createPaymentDto);
-  }
-
-  @Get('orders')
-  async findAllOrders(@Query() getAllOrdersDto: GetAllOrdersDto) {
-    return this.paymentsService.findAllOrders(getAllOrdersDto);
-  }
-
-  @Patch('orders/:id')
-  @HttpCode(204)
-  updateOrder(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.paymentsService.updateOrder(+id, updateOrderDto);
-  }
-
-  @Patch(':id')
-  @HttpCode(204)
-  updatePayment(
-    @Param('id') id: string,
-    @Body() updatePaymentDto: UpdatePaymentDto,
-  ) {
-    return this.paymentsService.updatePayment(+id, updatePaymentDto);
-  }
-
-  @Get('orders/:id')
-  findOrder(@Param('id') id: number) {
-    return this.paymentsService.findOrder(id);
   }
 }
