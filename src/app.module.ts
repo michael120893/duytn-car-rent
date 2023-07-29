@@ -3,6 +3,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
+import 'winston-daily-rotate-file';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccessTokenGuard } from './common/guards/acessToken.guard';
@@ -42,14 +43,30 @@ import { UsersModule } from './modules/users/users.module';
     WinstonModule.forRootAsync({
       useFactory: () => ({
         transports: [
-          new winston.transports.Console(),
-          new winston.transports.File({
-            level: 'info',
-            filename: 'logs/application.log',
+          new winston.transports.DailyRotateFile({
+            filename: `logs/%DATE%-error.log`,
+            level: 'error',
             format: winston.format.combine(
               winston.format.timestamp(),
               winston.format.json(),
+              winston.format.colorize({ all: true }),
             ),
+            datePattern: 'YYYY-MM-DD',
+            zippedArchive: false,
+            maxFiles: '30d',
+            
+          }),
+
+          new winston.transports.DailyRotateFile({
+            filename: `logs/%DATE%-combined.log`,
+            format: winston.format.combine(
+              winston.format.timestamp(),
+              winston.format.json(),
+              winston.format.colorize({ all: true }),
+            ),
+            datePattern: 'YYYY-MM-DD',
+            zippedArchive: false,
+            maxFiles: '30d',
           }),
         ],
       }),

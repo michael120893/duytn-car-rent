@@ -17,7 +17,8 @@ export class LoggerMiddleware implements NestMiddleware {
 
   private maskJSONOptions = {
     maskWith: '*',
-    fields: ['password', 'authorization'],
+    maxMaskedCharactersStr: 8,
+    fields: ['password', 'authorization', 'email'],
   };
 
   private logger = new Logger();
