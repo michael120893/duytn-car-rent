@@ -2,14 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import { AppException } from 'src/common/customs/custom.exception';
 import {
   Coupon as CouponEnum,
   OrderStatus as OrderStatusEnum,
   PaymenMethod as PaymenMethodEnum,
   PaymentStatus as PaymentStatusEnum,
 } from 'src/common/enums/database.enum';
-import { ExceptionCode } from 'src/common/enums/exception_code';
 import { Coupon } from 'src/modules/payments/entities/coupon.entity';
 import { Order } from 'src/modules/payments/entities/order.entity';
 import { QueueService } from 'src/modules/queues/queues.service';
@@ -17,6 +15,11 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { Car } from '../cars/entities/car.entity';
 import { CarType } from '../cars/entities/car.type.entity';
 import { CreatePlaceOrderDto } from './dto/create-payment.dto';
+import { City } from './entities/city.entity';
+import {
+  AppException,
+  AppExceptionBody,
+} from 'src/common/exeptions/app.exception';
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -29,10 +32,52 @@ export class PaymentsService {
     private orderModel: typeof Order,
     @InjectModel(User)
     private userModel: typeof User,
+    @InjectModel(City)
+    private cityModel: typeof City,
     private readonly queueService: QueueService,
   ) {}
 
   async placeOrder(userId: number, createPlaceOrderDto: CreatePlaceOrderDto) {
+    const car = await this.carModel.findOne({
+      where: { id: createPlaceOrderDto.car_id },
+    });
+    if (!car) {
+      throw AppException.notFoundException(AppExceptionBody.carNotFound());
+    }
+
+    const pickupCity = await this.cityModel.findOne({
+      where: { id: createPlaceOrderDto.pick_up_city_id },
+    });
+    if (!pickupCity) {
+      throw AppException.notFoundException(AppExceptionBody.cityNotFound());
+    }
+
+    const dropoffCity = await this.cityModel.findOne({
+      where: { id: createPlaceOrderDto.drop_off_city_id },
+    });
+    if (!dropoffCity) {
+      throw AppException.notFoundException(AppExceptionBody.cityNotFound());
+    }
+
+    let coupon: Coupon | null;
+    if (createPlaceOrderDto.coupon_code) {
+      coupon = await this.couponModel.findOne({
+        where: {
+          code: createPlaceOrderDto.coupon_code,
+        },
+      });
+
+      if (coupon) {
+        if (!coupon.active) {
+          throw AppException.notFoundException(
+            AppExceptionBody.couponIsExpired(),
+          );
+        }
+      } else {
+        throw AppException.notFoundException(AppExceptionBody.couponNotFound());
+      }
+    }
+
     const t = await this.sequelize.transaction();
     try {
       if (await this.carAvailability(createPlaceOrderDto)) {
@@ -64,21 +109,15 @@ export class PaymentsService {
         let subtotal = car.price;
         let discount = 0;
 
-        if (createPlaceOrderDto.coupon_code) {
-          const coupon = await this.couponModel.findOne({
-            where: {
-              code: createPlaceOrderDto.coupon_code,
-            },
-          });
-          if (coupon) {
-            if (coupon.id === CouponEnum.Percentage) {
-              discount = (subtotal * coupon.discount_value) / 100;
-            } else if (coupon.id === CouponEnum.FixedAmount) {
-              discount = coupon.discount_value;
-            }
-            rawOrder.coupon_id = coupon.id;
+        if (coupon) {
+          if (coupon.id === CouponEnum.Percentage) {
+            discount = (subtotal * coupon.discount_value) / 100;
+          } else if (coupon.id === CouponEnum.FixedAmount) {
+            discount = coupon.discount_value;
           }
+          rawOrder.coupon_id = coupon.id;
         }
+
         rawOrder.sub_total = subtotal;
         rawOrder.discount = discount;
         rawOrder.total = subtotal - discount;
@@ -101,24 +140,13 @@ export class PaymentsService {
         await t.commit();
         return order;
       } else {
-        throw AppException.badRequestException({
-          code: ExceptionCode.BAD_REQUEST_CODE,
-          message: `car_id ${createPlaceOrderDto.car_id} is not available or not found`,
-        });
+        throw AppException.badRequestException(
+          AppExceptionBody.carNotAvailable(),
+        );
       }
     } catch (error) {
       await t.rollback();
-      if (
-        typeof error?.original?.code !== 'undefined' &&
-        error.original.code === 'ER_NO_REFERENCED_ROW_2'
-      ) {
-        throw AppException.badRequestException({
-          code: ExceptionCode.BAD_REQUEST_CODE,
-          message: error?.original?.sqlMessage,
-        });
-      } else {
-        throw error;
-      }
+      throw error;
     }
   }
 
@@ -160,9 +188,7 @@ export class PaymentsService {
       },
     });
     if (!car) {
-      throw AppException.notFoundException({
-        title: `car_id ${createPlaceOrderDto.car_id} is not found`,
-      });
+      throw AppException.notFoundException(AppExceptionBody.carNotFound());
     }
 
     let subtotal = car.price;

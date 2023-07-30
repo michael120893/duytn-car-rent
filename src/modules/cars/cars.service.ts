@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { CarCapacity } from 'src/modules/cars/entities/car.capacity.entity';
 import { Op } from 'sequelize';
-import { AppException } from 'src/common/customs/custom.exception';
+import { CarCapacity } from 'src/modules/cars/entities/car.capacity.entity';
 import { AddCarImageDto } from './dto/add-car-image.dto';
 import { CreateCarDto } from './dto/create-car.dto';
 import { GetAllCarsDto } from './dto/get-all-cars.dto';
@@ -14,6 +13,10 @@ import { CarImage } from './entities/car.image.entity';
 import { CarReview } from './entities/car.review.entity';
 import { CarSteering } from './entities/car.steering.entity';
 import { CarType } from './entities/car.type.entity';
+import {
+  AppException,
+  AppExceptionBody,
+} from 'src/common/exeptions/app.exception';
 @Injectable()
 export class CarsService {
   constructor(
@@ -76,17 +79,13 @@ export class CarsService {
     });
     if (car) return car;
 
-    throw AppException.notFoundException({
-      title: `Car id ${id} is not found`,
-    });
+    throw AppException.notFoundException(AppExceptionBody.carNotFound());
   }
 
   async updateCar(id: number, updateCarDto: UpdateCarDto) {
     const car = await this.findCarById(id);
     if (!car) {
-      throw AppException.notFoundException({
-        title: `car_id ${id} is not found`,
-      });
+      throw AppException.notFoundException(AppExceptionBody.carNotFound());
     }
 
     await this.carsModel.update(
@@ -111,9 +110,7 @@ export class CarsService {
   async removeCar(id: number) {
     const car = await this.findCarById(id);
     if (!car) {
-      throw AppException.notFoundException({
-        title: `car_id ${id} is not found`,
-      });
+      throw AppException.notFoundException(AppExceptionBody.carNotFound());
     }
     this.carsModel.destroy({
       where: {

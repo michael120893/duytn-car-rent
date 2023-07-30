@@ -54,7 +54,6 @@ import { UsersModule } from './modules/users/users.module';
             datePattern: 'YYYY-MM-DD',
             zippedArchive: false,
             maxFiles: '30d',
-            
           }),
 
           new winston.transports.DailyRotateFile({

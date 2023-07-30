@@ -8,8 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { DatabaseError } from 'sequelize';
-import { AppException } from '../customs/custom.exception';
-import { ExceptionCode } from 'src/common/enums/exception_code';
+import { AppException, AppExceptionBody } from '../exeptions/app.exception';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -44,11 +43,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         `${request.method} ${request.url}`,
       );
 
-      response.status(statusCode).json({
-        code: ExceptionCode.INTERNAL_SERVER_ERROR_CODE,
-        title: 'System error',
-        message: message,
-      });
+      response
+        .status(statusCode)
+        .json(AppExceptionBody.internalServerError(message));
     }
   }
 }

@@ -1,8 +1,7 @@
 import { ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { AppException } from '../customs/custom.exception';
-import { ExceptionCode } from '../enums/exception_code';
+import { AppException, AppExceptionBody } from '../exeptions/app.exception';
 
 export const IS_PUBLIC_KEY = 'isPublic';
 export const SkipAuth = () => SetMetadata(IS_PUBLIC_KEY, true);
@@ -27,10 +26,9 @@ export class AccessTokenGuard extends AuthGuard('jwt') {
 
   handleRequest(err, user, info) {
     if (err || !user) {
-      throw AppException.unauthorizedException({
-        code: ExceptionCode.FORBIDDEN_CODE,
-        message: 'Unauthorized',
-      });
+      throw AppException.unauthorizedException(
+        AppExceptionBody.unauthorizedAccess(),
+      );
     }
     return user;
   }

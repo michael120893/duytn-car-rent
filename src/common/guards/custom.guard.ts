@@ -1,9 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { AppException } from 'src/common/customs/custom.exception';
-import { ExceptionCode } from '../enums/exception_code';
 import { JWT_ACCESS_SECRET } from 'src/enviroments';
+import { AppException, AppExceptionBody } from '../exeptions/app.exception';
 
 @Injectable()
 export class CustomAuthGuard implements CanActivate {
@@ -13,10 +12,9 @@ export class CustomAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw AppException.unauthorizedException({
-        code: ExceptionCode.FORBIDDEN_CODE,
-        message: 'Unauthorized',
-      });
+      throw AppException.unauthorizedException(
+        AppExceptionBody.unauthorizedAccess(),
+      );
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -26,10 +24,9 @@ export class CustomAuthGuard implements CanActivate {
       // so that we can access it in our route handlers
       request['user'] = payload;
     } catch {
-      throw AppException.unauthorizedException({
-        code: ExceptionCode.FORBIDDEN_CODE,
-        message: 'Unauthorized',
-      });
+      throw AppException.unauthorizedException(
+        AppExceptionBody.unauthorizedAccess(),
+      );
     }
     return true;
   }

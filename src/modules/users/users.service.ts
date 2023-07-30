@@ -1,12 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/modules/users/entities/user.entity';
-import { AppException } from 'src/common/customs/custom.exception';
-import { ExceptionCode } from 'src/common/enums/exception_code';
 import { QueueService } from 'src/modules/queues/queues.service';
+import { User } from 'src/modules/users/entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  AppException,
+  AppExceptionBody,
+} from 'src/common/exeptions/app.exception';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +18,11 @@ export class UsersService {
     private readonly queueService: QueueService,
   ) {}
   async createUser(createUserDto: CreateUserDto) {
+    const user = await this.findUserByEmail(createUserDto.email);
+    if (user) {
+      throw AppException.conflictException(AppExceptionBody.userExists());
+    }
+
     try {
       const salt = await bcrypt.genSalt(10);
       const userRequest = createUserDto;
@@ -37,17 +44,9 @@ export class UsersService {
       );
       return result;
     } catch (err) {
-      if (
-        typeof err?.original?.code !== 'undefined' &&
-        err.original.code === 'ER_DUP_ENTRY'
-      ) {
-        throw AppException.conflictException({
-          code: ExceptionCode.VALIDATION_CODE,
-          title: 'Validation Error',
-          message: err.errors[0].message,
-        });
-      }
-      throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw AppException.internalServerException(
+        AppExceptionBody.internalServerError(err?.errors[0]?.message),
+      );
     }
   }
 
@@ -74,9 +73,7 @@ export class UsersService {
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findUserById(id);
     if (!user) {
-      throw AppException.notFoundException({
-        title: `user_id ${id} is not found`,
-      });
+      throw AppException.notFoundException(AppExceptionBody.userNotFound());
     }
 
     await this.userModel.update(
@@ -95,9 +92,7 @@ export class UsersService {
   async removeUser(id: number) {
     const user = await this.findUserById(id);
     if (!user) {
-      throw AppException.notFoundException({
-        title: `user_id ${id} is not found`,
-      });
+      throw AppException.notFoundException(AppExceptionBody.userNotFound());
     }
 
     this.userModel.destroy({

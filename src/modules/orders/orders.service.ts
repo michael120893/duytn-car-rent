@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { AppException } from 'src/common/customs/custom.exception';
 import { Coupon } from 'src/modules/payments/entities/coupon.entity';
 import { Order } from 'src/modules/payments/entities/order.entity';
 import { Paging } from '../cars/dto/paging.dto';
@@ -9,6 +8,10 @@ import { UpdateOrderStatusDto } from '../payments/dto/update-order-status.dto';
 import { UpdatePaymentStatusDto } from '../payments/dto/update-payment-status.dto';
 import { PaymentMethod } from '../payments/entities/payment.method.entity';
 import { PaymentStatus } from '../payments/entities/payment.status.entity';
+import {
+  AppException,
+  AppExceptionBody,
+} from 'src/common/exeptions/app.exception';
 
 @Injectable()
 export class OrdersService {
@@ -41,17 +44,13 @@ export class OrdersService {
     });
     if (order) return order;
 
-    throw AppException.notFoundException({
-      title: `order_id ${id} is not found`,
-    });
+    throw AppException.notFoundException(AppExceptionBody.orderNotFound());
   }
 
   async updateOrder(id: number, updateOrder: UpdateOrderStatusDto) {
     const order = await this.findOrder(id);
     if (!order) {
-      throw AppException.notFoundException({
-        title: `order_id ${id} is not found`,
-      });
+      throw AppException.notFoundException(AppExceptionBody.orderNotFound());
     }
     await this.orderModel.update(
       {
@@ -67,9 +66,7 @@ export class OrdersService {
   async updatePayment(id: number, updatePayment: UpdatePaymentStatusDto) {
     const order = await this.findOrder(id);
     if (!order) {
-      throw AppException.notFoundException({
-        title: `order_id ${id} is not found`,
-      });
+      throw AppException.notFoundException(AppExceptionBody.orderNotFound());
     }
     await this.orderModel.update(
       {

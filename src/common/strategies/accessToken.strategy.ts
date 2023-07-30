@@ -4,8 +4,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JWT_ACCESS_SECRET } from 'src/enviroments';
 import { CacheRedisService } from 'src/modules/cache/cache.redis.service';
-import { AppException } from '../customs/custom.exception';
-import { ExceptionCode } from '../enums/exception_code';
+import { AppException, AppExceptionBody } from '../exeptions/app.exception';
 
 type JwtPayload = {
   sub: string;
@@ -25,10 +24,9 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(req: Request, payload: JwtPayload) {
     const accessToken = req.get('Authorization').replace('Bearer', '').trim();
     if (await this.cacheService.isTokenInBlackList(accessToken)) {
-      throw AppException.unauthorizedException({
-        code: ExceptionCode.FORBIDDEN_CODE,
-        message: 'Unauthorized',
-      });
+      throw AppException.unauthorizedException(
+        AppExceptionBody.unauthorizedAccess(),
+      );
     }
     return { ...payload, accessToken };
   }
