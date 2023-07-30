@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
-import { QueueService } from 'src/modules/queues/queues.service';
-import { User } from 'src/modules/users/entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import {
   AppException,
   AppExceptionBody,
 } from 'src/common/exeptions/app.exception';
+import { passwordPattern } from 'src/common/utils/contants';
+import { QueueService } from 'src/modules/queues/queues.service';
+import { User } from 'src/modules/users/entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,6 +19,13 @@ export class UsersService {
     private readonly queueService: QueueService,
   ) {}
   async createUser(createUserDto: CreateUserDto) {
+    const isValidPassword = passwordPattern.test(createUserDto.password);
+    if (!isValidPassword) {
+      throw AppException.badRequestException(
+        AppExceptionBody.invalidPassword(),
+      );
+    }
+
     const user = await this.findUserByEmail(createUserDto.email);
     if (user) {
       throw AppException.conflictException(AppExceptionBody.userExists());

@@ -11,6 +11,8 @@ import { OrdersService } from './orders.service';
 import { GetAllOrdersDto } from '../payments/dto/get-all-orders.dto';
 import { UpdateOrderStatusDto } from '../payments/dto/update-order-status.dto';
 import { UpdatePaymentStatusDto } from '../payments/dto/update-payment-status.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from 'src/common/enums/role.enum';
 
 @Controller('orders')
 export class OrdersController {
@@ -23,6 +25,7 @@ export class OrdersController {
 
   @Patch(':id')
   @HttpCode(204)
+  @Roles(Role.Admin)
   updateOrderStatus(
     @Param('id') id: string,
     @Body() updateOrderDto: UpdateOrderStatusDto,
@@ -32,6 +35,7 @@ export class OrdersController {
 
   @Patch(':id/payment-status')
   @HttpCode(204)
+  @Roles(Role.Admin)
   updatePaymentStatus(
     @Param('id') id: string,
     @Body() updatePaymentDto: UpdatePaymentStatusDto,

@@ -2,6 +2,7 @@ import { Exclude } from 'class-transformer';
 import {
   AutoIncrement,
   Column,
+  DataType,
   HasMany,
   HasOne,
   Model,
@@ -10,9 +11,10 @@ import {
   Unique,
 } from 'sequelize-typescript';
 
-import { UserInfo } from './user.info.entity';
-import { Order } from '../../payments/entities/order.entity';
+import { Role } from 'src/common/enums/role.enum';
 import { CarReview } from 'src/modules/cars/entities/car.review.entity';
+import { Order } from '../../payments/entities/order.entity';
+import { UserAddress } from './user.address.entity';
 
 @Table({ tableName: 'Users' })
 export class User extends Model<User> {
@@ -35,11 +37,18 @@ export class User extends Model<User> {
   @Column
   phone: string;
 
+  @Column({
+    type: DataType.ENUM(Role.Admin, Role.User),
+    allowNull: false,
+    defaultValue: Role.User,
+  })
+  role: string;
+
   @Column
   avatar_url: string;
 
-  @HasOne(() => UserInfo)
-  userIndo: UserInfo;
+  @HasOne(() => UserAddress)
+  userAddress: UserAddress;
 
   @HasMany(() => Order)
   orders: Order[];

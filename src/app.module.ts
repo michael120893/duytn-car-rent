@@ -7,6 +7,7 @@ import 'winston-daily-rotate-file';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AccessTokenGuard } from './common/guards/acessToken.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import {
@@ -80,6 +81,10 @@ import { UsersModule } from './modules/users/users.module';
     {
       provide: APP_GUARD,
       useClass: AccessTokenGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     {
       provide: APP_INTERCEPTOR,

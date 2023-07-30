@@ -33,16 +33,17 @@ export class AuthService {
         AppExceptionBody.invalidEmailOrPassword(),
       );
     }
-    const tokens = await this.getTokens(user.id, user.name);
+    const tokens = await this.getTokens(user.id, user.name, user.role);
     return tokens;
   }
 
-  async getTokens(userId: number, username: string) {
+  async getTokens(userId: number, username: string, role: string) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
         {
           sub: userId,
           name: username,
+          role: role,
         },
         {
           secret: JWT_ACCESS_SECRET,
@@ -53,6 +54,7 @@ export class AuthService {
         {
           sub: userId,
           name: username,
+          role: role,
         },
         {
           secret: JWT_REFRESH_SECRET,
@@ -67,14 +69,14 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(userId: number, refreshToken: string) {
+  async refreshTokens(userId: number, refreshToken: string, userRole: string) {
     const user = await this.usersService.findUserById(userId);
     console.log(user + ' - ' + userId);
     if (!user) {
       throw AppException.forbiddenException(AppExceptionBody.userNotFound());
     }
 
-    const tokens = await this.getTokens(user.id, user.email);
+    const tokens = await this.getTokens(user.id, user.email, userRole);
     return tokens;
   }
 }

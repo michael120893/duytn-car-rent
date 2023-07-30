@@ -2,9 +2,7 @@ import { ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { AppException, AppExceptionBody } from '../exeptions/app.exception';
-
-export const IS_PUBLIC_KEY = 'isPublic';
-export const SkipAuth = () => SetMetadata(IS_PUBLIC_KEY, true);
+import { IS_PUBLIC_KEY } from '../decorators/skip.auth.decorator';
 
 @Injectable()
 export class AccessTokenGuard extends AuthGuard('jwt') {

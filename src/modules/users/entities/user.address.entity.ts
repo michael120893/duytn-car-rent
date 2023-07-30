@@ -10,8 +10,8 @@ import {
 } from 'sequelize-typescript';
 import { User } from './user.entity';
 
-@Table({ tableName: 'UserInfos' })
-export class UserInfo extends Model {
+@Table({ tableName: 'UserAddresses' })
+export class UserAddress extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column

@@ -114,6 +114,17 @@ export class AppExceptionBody {
     };
   }
 
+  static invalidPassword(): AppExceptionOptions {
+    return {
+      error_id: 'USER-0004',
+      code: 'INVALID_PARAMETER',
+      title: 'An error has occurred',
+      message:
+        'The password should fulfill the following criteria: At least 8 characters long, contain at least one uppercase letter, contain at least one lowercase letter, contain at least one digit, and can optionally contain special characters.',
+      errors: [],
+    };
+  }
+
   static orderNotFound(): AppExceptionOptions {
     return {
       error_id: 'ORDER-0001',
@@ -128,9 +139,19 @@ export class AppExceptionBody {
     return {
       error_id: 'SYS-0401',
       code: 'UNAUTHORIZED_ACCESS',
-      title: 'User not authenticated',
+      title: 'Unauthorized Access',
       message:
         'User authentication has not been performed. You need to log in again.',
+      errors: [],
+    };
+  }
+
+  static forbiddenAccess(): AppExceptionOptions {
+    return {
+      error_id: 'SYS-0403',
+      code: 'FORBIDDEN_ACCESS',
+      title: 'Forbidden Access',
+      message: `Sorry, you don't have the necessary authorization to access this API. Please check your credentials and ensure that you have the required permissions.`,
       errors: [],
     };
   }

@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 
 import { Request } from 'express';
-import { SkipAuth } from 'src/common/guards/acessToken.guard';
 import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
 import { CustomValidationPipe } from 'src/common/validations/pipes/validation.pipe';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
@@ -20,6 +19,7 @@ import { UsersService } from 'src/modules/users/users.service';
 import { CacheRedisService } from '../cache/cache.redis.service';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
+import { SkipAuth } from 'src/common/decorators/skip.auth.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -49,6 +49,7 @@ export class AuthController {
     return this.cacheRedisService.setTokenToBlackList(req.user['accessToken']);
   }
 
+
   @Get('profile')
   getProfile(@Req() req: Request): any {
     return req.user;
@@ -59,7 +60,8 @@ export class AuthController {
   @Get('refresh')
   async refreshTokens(@Req() req: Request) {
     const userId = req.user['sub'];
+    const userRole = req.user['role'];
     const refreshToken = req.user['refreshToken'];
-    return this.authService.refreshTokens(userId, refreshToken);
+    return this.authService.refreshTokens(userId, refreshToken, userRole);
   }
 }

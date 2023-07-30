@@ -4,10 +4,10 @@ import { QueuesModule } from 'src/modules/queues/queues.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User } from 'src/modules/users/entities/user.entity';
-import { UserInfo } from './entities/user.info.entity';
+import { UserAddress } from './entities/user.address.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User, UserInfo]), QueuesModule],
+  imports: [SequelizeModule.forFeature([User, UserAddress]), QueuesModule],
   exports: [UsersService],
   controllers: [UsersController],
   providers: [UsersService],

@@ -9,6 +9,7 @@ import { AppException, AppExceptionBody } from '../exeptions/app.exception';
 type JwtPayload = {
   sub: string;
   username: string;
+  role: String;
 };
 
 @Injectable()
