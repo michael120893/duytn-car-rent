@@ -49,7 +49,6 @@ export class AuthController {
     return this.cacheRedisService.setTokenToBlackList(req.user['accessToken']);
   }
 
-
   @Get('profile')
   getProfile(@Req() req: Request): any {
     return req.user;

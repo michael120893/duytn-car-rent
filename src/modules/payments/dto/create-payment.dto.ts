@@ -35,6 +35,10 @@ export class CreatePlaceOrderDto {
   @IsNotEmpty()
   drop_off_city_id: number;
 
+  @IsNumber()
+  @IsOptional()
+  billing_id?: number;
+
   @IsString()
   @IsNotEmpty()
   billing_name: string;

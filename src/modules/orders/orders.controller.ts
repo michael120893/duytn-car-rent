@@ -5,14 +5,19 @@ import {
   HttpCode,
   Param,
   Patch,
+  Post,
   Query,
+  Req,
+  UsePipes,
 } from '@nestjs/common';
-import { OrdersService } from './orders.service';
-import { GetAllOrdersDto } from '../payments/dto/get-all-orders.dto';
-import { UpdateOrderStatusDto } from '../payments/dto/update-order-status.dto';
-import { UpdatePaymentStatusDto } from '../payments/dto/update-payment-status.dto';
+import { Request } from 'express';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enums/role.enum';
+import { CustomValidationPipe } from 'src/common/validations/pipes/validation.pipe';
+import { CreatePlaceOrderDto } from '../payments/dto/create-payment.dto';
+import { GetAllOrdersDto } from '../payments/dto/get-all-orders.dto';
+import { UpdateOrderStatusDto } from '../payments/dto/update-order-status.dto';
+import { OrdersService } from './orders.service';
 
 @Controller('orders')
 export class OrdersController {
@@ -33,18 +38,22 @@ export class OrdersController {
     return this.ordersService.updateOrder(+id, updateOrderDto);
   }
 
-  @Patch(':id/payment-status')
-  @HttpCode(204)
-  @Roles(Role.Admin)
-  updatePaymentStatus(
-    @Param('id') id: string,
-    @Body() updatePaymentDto: UpdatePaymentStatusDto,
-  ) {
-    return this.ordersService.updatePayment(+id, updatePaymentDto);
-  }
-
   @Get(':id')
   findOrder(@Param('id') id: number) {
     return this.ordersService.findOrder(id);
+  }
+
+  @Post('calculate_price')
+  create(@Body() createPlaceOrderDto: CreatePlaceOrderDto): Promise<any> {
+    return this.ordersService.calculatePrice(createPlaceOrderDto);
+  }
+
+  @Post('place_order')
+  @UsePipes(new CustomValidationPipe())
+  placeOrder(
+    @Req() req: Request,
+    @Body() createPaymentDto: CreatePlaceOrderDto,
+  ) {
+    return this.ordersService.placeOrder(req.user['sub'], createPaymentDto);
   }
 }

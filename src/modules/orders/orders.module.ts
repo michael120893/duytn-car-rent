@@ -5,10 +5,13 @@ import { City } from '../payments/entities/city.entity';
 import { Coupon } from '../payments/entities/coupon.entity';
 import { CouponType } from '../payments/entities/coupon.type.entity';
 import { Order } from '../payments/entities/order.entity';
+import { OrderHistory } from '../payments/entities/order.history.entity';
 import { OrderStatus } from '../payments/entities/order.status.entity';
 import { PaymentMethod } from '../payments/entities/payment.method.entity';
 import { PaymentStatus } from '../payments/entities/payment.status.entity';
+import { QueuesModule } from '../queues/queues.module';
 import { User } from '../users/entities/user.entity';
+import { Billing } from './entities/billing.entity';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 
@@ -24,7 +27,10 @@ import { OrdersService } from './orders.service';
       OrderStatus,
       User,
       City,
+      Billing,
+      OrderHistory,
     ]),
+    QueuesModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],
