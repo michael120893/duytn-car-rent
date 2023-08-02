@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 
 import { Car } from 'src/modules/cars/entities/car.entity';
+import { Billing } from 'src/modules/orders/entities/billing.entity';
 import { User } from '../../users/entities/user.entity';
 import { City } from './city.entity';
 import { Coupon } from './coupon.entity';
@@ -71,6 +72,13 @@ export class Order extends Model {
   @BelongsTo(() => Coupon)
   coupon: Coupon;
 
+  @ForeignKey(() => Billing)
+  @Column
+  billing_id: number;
+
+  @BelongsTo(() => Billing)
+  billing: Billing;
+
   @ForeignKey(() => City)
   @Column
   pick_up_city_id: number;
@@ -93,16 +101,4 @@ export class Order extends Model {
 
   @Column
   discount: number;
-
-  @Column
-  billing_name: string;
-
-  @Column
-  billing_phone_number: string;
-
-  @Column
-  billing_address: string;
-
-  @Column
-  billing_city: string;
 }

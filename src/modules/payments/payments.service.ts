@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import {
   Coupon as CouponEnum,
@@ -8,18 +8,20 @@ import {
   PaymenMethod as PaymenMethodEnum,
   PaymentStatus as PaymentStatusEnum,
 } from 'src/common/enums/database.enum';
+import {
+  AppException,
+  AppExceptionBody,
+} from 'src/common/exeptions/app.exception';
 import { Coupon } from 'src/modules/payments/entities/coupon.entity';
 import { Order } from 'src/modules/payments/entities/order.entity';
 import { QueueService } from 'src/modules/queues/queues.service';
 import { User } from 'src/modules/users/entities/user.entity';
 import { Car } from '../cars/entities/car.entity';
 import { CarType } from '../cars/entities/car.type.entity';
+import { Billing } from '../orders/entities/billing.entity';
 import { CreatePlaceOrderDto } from './dto/create-payment.dto';
 import { City } from './entities/city.entity';
-import {
-  AppException,
-  AppExceptionBody,
-} from 'src/common/exeptions/app.exception';
+import { OrderHistory } from './entities/order.history.entity';
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -80,9 +82,19 @@ export class PaymentsService {
 
     const t = await this.sequelize.transaction();
     try {
-      if (await this.carAvailability(createPlaceOrderDto)) {
+      if (await this.carAvailability(createPlaceOrderDto, t)) {
+        const rawBilling = new Billing();
+        rawBilling.user_id = userId;
+        rawBilling.billing_name = createPlaceOrderDto.billing_name;
+        rawBilling.billing_phone_number =
+          createPlaceOrderDto.billing_phone_number;
+        rawBilling.billing_address = createPlaceOrderDto.billing_address;
+        rawBilling.billing_city = createPlaceOrderDto.billing_city;
+        const billing = await rawBilling.save({ transaction: t });
+
         const rawOrder = new Order();
         rawOrder.user_id = userId;
+        rawOrder.billing_id = billing.id;
         rawOrder.car_id = createPlaceOrderDto.car_id;
         rawOrder.drop_off_date = createPlaceOrderDto.drop_off_date;
         rawOrder.drop_off_city_id = createPlaceOrderDto.drop_off_city_id;
@@ -92,12 +104,6 @@ export class PaymentsService {
         rawOrder.order_status_id = OrderStatusEnum.Renting;
         rawOrder.payment_status_id = PaymentStatusEnum.Pending;
         rawOrder.payment_method_id = PaymenMethodEnum.Cash;
-
-        rawOrder.billing_name = createPlaceOrderDto.billing_name;
-        rawOrder.billing_phone_number =
-          createPlaceOrderDto.billing_phone_number;
-        rawOrder.billing_address = createPlaceOrderDto.billing_address;
-        rawOrder.billing_city = createPlaceOrderDto.billing_city;
 
         const car = await this.carModel.findOne({
           include: [CarType],
@@ -128,6 +134,12 @@ export class PaymentsService {
 
         const order = await rawOrder.save({ transaction: t });
 
+        const orderHistory = new OrderHistory();
+        orderHistory.order_id = order.id;
+        orderHistory.payment_status_id = PaymentStatusEnum.Pending;
+        orderHistory.order_status_id = OrderStatusEnum.Renting;
+        await orderHistory.save({ transaction: t });
+
         this.queueService.sendPlaceOrderMail(
           user.email,
           user.name,
@@ -152,33 +164,60 @@ export class PaymentsService {
 
   async carAvailability(
     createPlaceOrderDto: CreatePlaceOrderDto,
+    transaction: Transaction,
   ): Promise<boolean> {
-    let carAvailable = !(await this.orderModel.findOne({
-      where: {
-        car_id: createPlaceOrderDto.car_id,
-      },
-    }));
-    if (carAvailable) return true;
+    const {
+      car_id,
+      pick_up_city_id,
+      drop_off_city_id,
+      pick_up_date,
+      drop_off_date,
+    } = createPlaceOrderDto;
 
-    const literalValue = Sequelize.literal(`(SELECT COUNT(*) FROM orders 
-      WHERE (('${createPlaceOrderDto.pick_up_date}' BETWEEN orders.pick_up_date AND orders.drop_off_date) 
-      OR ('${createPlaceOrderDto.drop_off_date}' BETWEEN orders.pick_up_date AND orders.drop_off_date) 
-      OR (orders.pick_up_date BETWEEN '${createPlaceOrderDto.pick_up_date}' AND '${createPlaceOrderDto.drop_off_date}') 
-      OR (orders.drop_off_date BETWEEN '${createPlaceOrderDto.pick_up_date}' AND '${createPlaceOrderDto.drop_off_date}')) 
-      and orders.order_status_id = ${OrderStatusEnum.Renting}) = 0`);
-
-    return !!(await this.carModel.findOne({
-      include: [
-        {
-          model: Order,
-          required: true,
-        },
-      ],
+    let carAvailable = await this.carModel.findOne({
+      attributes: ['id'],
       where: {
-        id: createPlaceOrderDto.car_id,
-        [Op.and]: [literalValue],
+        [Op.and]: [
+          { id: car_id },
+          {
+            id: {
+              [Op.in]: Sequelize.literal(
+                `(SELECT car_id FROM PickupDropoffCars where pickup_city_id = ${pick_up_city_id})`,
+              ),
+            },
+          },
+          {
+            id: {
+              [Op.in]: Sequelize.literal(
+                `(SELECT car_id FROM PickupDropoffCars where dropoff_city_id = ${drop_off_city_id})`,
+              ),
+            },
+          },
+          {
+            id: {
+              [Op.notIn]: [
+                Sequelize.literal(
+                  `(SELECT car_id from Orders 
+                    WHERE 
+                    Orders.order_status_id = ${OrderStatusEnum.Renting} AND 
+                      (
+                        ('${pick_up_date}' BETWEEN Orders.pick_up_date AND Orders.drop_off_date) OR 
+                        ('${drop_off_date}' BETWEEN Orders.pick_up_date AND Orders.drop_off_date) OR 
+                        (Orders.pick_up_date BETWEEN '${pick_up_date}' AND '${drop_off_date}') OR 
+                        (Orders.drop_off_date BETWEEN '${pick_up_date}' AND '${drop_off_date}')
+                      )
+                    )`,
+                ),
+              ],
+            },
+          },
+        ],
       },
-    }));
+      lock: transaction.LOCK.UPDATE,
+      transaction: transaction,
+    });
+
+    return !!carAvailable;
   }
 
   async calculatePrice(createPlaceOrderDto: CreatePlaceOrderDto) {

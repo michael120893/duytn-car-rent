@@ -14,6 +14,7 @@ import { CarImage } from './car.image.entity';
 import { CarReview } from './car.review.entity';
 import { CarSteering } from './car.steering.entity';
 import { CarType } from './car.type.entity';
+import { CarPickupDropoff } from './car.pickup.dropoff.entity';
 @Table({ tableName: 'Cars' })
 export class Car extends Model<Car> {
   @AutoIncrement
@@ -68,4 +69,7 @@ export class Car extends Model<Car> {
 
   @HasMany(() => CarReview)
   reviews: CarReview[];
+
+  @HasMany(() => CarPickupDropoff)
+  pickupDropoffs: CarPickupDropoff[];
 }

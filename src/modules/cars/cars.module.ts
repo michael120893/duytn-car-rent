@@ -8,6 +8,7 @@ import { CarImage } from './entities/car.image.entity';
 import { CarReview } from './entities/car.review.entity';
 import { CarSteering } from './entities/car.steering.entity';
 import { CarType } from './entities/car.type.entity';
+import { CarPickupDropoff } from './entities/car.pickup.dropoff.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CarType } from './entities/car.type.entity';
       CarReview,
       CarImage,
       CarSteering,
+      CarPickupDropoff,
     ]),
   ],
   controllers: [CarsController],

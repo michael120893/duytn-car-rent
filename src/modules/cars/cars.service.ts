@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
+import { OrderStatus as OrderStatusEnum } from 'src/common/enums/database.enum';
+import {
+  AppException,
+  AppExceptionBody,
+} from 'src/common/exeptions/app.exception';
 import { CarCapacity } from 'src/modules/cars/entities/car.capacity.entity';
+import { Order } from '../payments/entities/order.entity';
 import { AddCarImageDto } from './dto/add-car-image.dto';
 import { CreateCarDto } from './dto/create-car.dto';
 import { GetAllCarsDto } from './dto/get-all-cars.dto';
@@ -10,13 +16,10 @@ import { ReviewCarDto } from './dto/review-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { Car } from './entities/car.entity';
 import { CarImage } from './entities/car.image.entity';
+import { CarPickupDropoff } from './entities/car.pickup.dropoff.entity';
 import { CarReview } from './entities/car.review.entity';
 import { CarSteering } from './entities/car.steering.entity';
 import { CarType } from './entities/car.type.entity';
-import {
-  AppException,
-  AppExceptionBody,
-} from 'src/common/exeptions/app.exception';
 @Injectable()
 export class CarsService {
   constructor(
@@ -39,26 +42,66 @@ export class CarsService {
   }
 
   async findAllCars(getAllCarsDto: GetAllCarsDto) {
-    const { name, price, gasoline, limit, offset } = getAllCarsDto;
-
-    const whereStatment: any = {};
-    if (name) {
-      whereStatment.name = { [Op.like]: `%${name}%` };
-    }
-
-    if (price) {
-      whereStatment.price = { [Op.lte]: price };
-    }
-    if (gasoline) {
-      whereStatment.gasoline = { [Op.lte]: gasoline };
-    }
+    const {
+      name,
+      price,
+      gasoline,
+      car_type_id,
+      pickup_city_id,
+      dropoff_city_id,
+      pick_up_date,
+      drop_off_date,
+      limit,
+      offset,
+    } = getAllCarsDto;
 
     const result = await this.carsModel.findAndCountAll({
       attributes: {
         exclude: ['car_type_id', 'car_steering_id', 'car_capacity_id'],
       },
-      include: [CarSteering, CarCapacity, CarType, CarReview, CarImage],
-      where: whereStatment,
+      include: [
+        CarSteering,
+        CarCapacity,
+        {
+          model: CarType,
+          required: true,
+          where: {
+            ...(car_type_id && { id: car_type_id }),
+          },
+        },
+        CarReview,
+        CarImage,
+        {
+          model: CarPickupDropoff,
+          where: {
+            ...(pickup_city_id && { pickup_city_id: pickup_city_id }),
+            ...(dropoff_city_id && { dropoff_city_id: dropoff_city_id }),
+          },
+        },
+        {
+          model: Order,
+        },
+      ],
+      where: {
+        ...(name && { name: { [Op.like]: `%${name}%` } }),
+        ...(price && { price: { [Op.lte]: price } }),
+        ...(gasoline && { gasoline: { [Op.eq]: gasoline } }),
+        id: {
+          [Op.notIn]: [
+            Sequelize.literal(
+              `(SELECT car_id from orders 
+                WHERE orders.order_status_id = ${OrderStatusEnum.Renting} AND 
+                  (
+                    ('${pick_up_date}' BETWEEN orders.pick_up_date AND orders.drop_off_date) OR 
+                    ('${drop_off_date}' BETWEEN orders.pick_up_date AND orders.drop_off_date) OR 
+                    (orders.pick_up_date BETWEEN '${pick_up_date}' AND '${drop_off_date}') OR 
+                    (orders.drop_off_date BETWEEN '${pick_up_date}' AND '${drop_off_date}')
+                  )
+                )`,
+            ),
+          ],
+        },
+      },
       limit: +limit,
       offset: +offset,
     });
