@@ -12,16 +12,12 @@ import {
   AppException,
   AppExceptionBody,
 } from 'src/common/exeptions/app.exception';
-import { Coupon } from 'src/modules/payments/entities/coupon.entity';
-import { Order } from 'src/modules/payments/entities/order.entity';
 import { Paging } from '../cars/dto/paging.dto';
 import { Car } from '../cars/entities/car.entity';
 import { CarType } from '../cars/entities/car.type.entity';
 import { CreatePlaceOrderDto } from '../payments/dto/create-payment.dto';
 import { GetAllOrdersDto } from '../payments/dto/get-all-orders.dto';
 import { UpdateOrderStatusDto } from '../payments/dto/update-order-status.dto';
-import { City } from '../payments/entities/city.entity';
-import { OrderHistory } from '../payments/entities/order.history.entity';
 import { PaymentMethod } from '../payments/entities/payment.method.entity';
 import { PaymentStatus } from '../payments/entities/payment.status.entity';
 import { QueueService } from '../queues/queues.service';
@@ -29,6 +25,10 @@ import { User } from '../users/entities/user.entity';
 import { Billing } from './entities/billing.entity';
 
 import * as moment from 'moment-timezone';
+import { Order } from './entities/order.entity';
+import { Coupon } from './entities/coupon.entity';
+import { City } from './entities/city.entity';
+import { OrderHistory } from './entities/order.history.entity';
 @Injectable()
 export class OrdersService {
   constructor(

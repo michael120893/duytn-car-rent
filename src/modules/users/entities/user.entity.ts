@@ -13,8 +13,8 @@ import {
 
 import { Role } from 'src/common/enums/role.enum';
 import { CarReview } from 'src/modules/cars/entities/car.review.entity';
-import { Order } from '../../payments/entities/order.entity';
 import { UserAddress } from './user.address.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
 
 @Table({ tableName: 'Users' })
 export class User extends Model<User> {

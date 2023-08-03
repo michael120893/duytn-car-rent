@@ -4,8 +4,8 @@ import {
   AppException,
   AppExceptionBody,
 } from 'src/common/exeptions/app.exception';
-import { Order } from 'src/modules/payments/entities/order.entity';
 import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
+import { Order } from '../orders/entities/order.entity';
 @Injectable()
 export class PaymentsService {
   constructor(

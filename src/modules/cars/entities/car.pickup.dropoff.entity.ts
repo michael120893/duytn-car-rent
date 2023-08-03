@@ -7,8 +7,8 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { City } from 'src/modules/payments/entities/city.entity';
 import { Car } from './car.entity';
+import { City } from 'src/modules/orders/entities/city.entity';
 @Table({ tableName: 'PickupDropoffCars' })
 export class CarPickupDropoff extends Model {
   @AutoIncrement

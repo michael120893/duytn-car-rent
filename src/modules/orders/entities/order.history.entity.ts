@@ -10,7 +10,7 @@ import {
 
 import { Order } from './order.entity';
 import { OrderStatus } from './order.status.entity';
-import { PaymentStatus } from './payment.status.entity';
+import { PaymentStatus } from 'src/modules/payments/entities/payment.status.entity';
 
 @Table({ tableName: 'OrderHistories' })
 export class OrderHistory extends Model {

@@ -8,13 +8,13 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { Order } from 'src/modules/payments/entities/order.entity';
 import { CarCapacity } from './car.capacity.entity';
 import { CarImage } from './car.image.entity';
 import { CarReview } from './car.review.entity';
 import { CarSteering } from './car.steering.entity';
 import { CarType } from './car.type.entity';
 import { CarPickupDropoff } from './car.pickup.dropoff.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
 @Table({ tableName: 'Cars' })
 export class Car extends Model<Car> {
   @AutoIncrement

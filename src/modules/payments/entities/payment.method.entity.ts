@@ -6,7 +6,7 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { Order } from './order.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
 
 @Table({ tableName: 'PaymentMethods' })
 export class PaymentMethod extends Model {

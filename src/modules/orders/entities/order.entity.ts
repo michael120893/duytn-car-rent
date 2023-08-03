@@ -14,8 +14,8 @@ import { User } from '../../users/entities/user.entity';
 import { City } from './city.entity';
 import { Coupon } from './coupon.entity';
 import { OrderStatus } from './order.status.entity';
-import { PaymentMethod } from './payment.method.entity';
-import { PaymentStatus } from './payment.status.entity';
+import { PaymentStatus } from 'src/modules/payments/entities/payment.status.entity';
+import { PaymentMethod } from 'src/modules/payments/entities/payment.method.entity';
 
 @Table({ tableName: 'Orders' })
 export class Order extends Model {

@@ -7,7 +7,6 @@ import {
   AppExceptionBody,
 } from 'src/common/exeptions/app.exception';
 import { CarCapacity } from 'src/modules/cars/entities/car.capacity.entity';
-import { Order } from '../payments/entities/order.entity';
 import { AddCarImageDto } from './dto/add-car-image.dto';
 import { CreateCarDto } from './dto/create-car.dto';
 import { GetAllCarsDto } from './dto/get-all-cars.dto';
@@ -20,6 +19,7 @@ import { CarPickupDropoff } from './entities/car.pickup.dropoff.entity';
 import { CarReview } from './entities/car.review.entity';
 import { CarSteering } from './entities/car.steering.entity';
 import { CarType } from './entities/car.type.entity';
+import { Order } from '../orders/entities/order.entity';
 @Injectable()
 export class CarsService {
   constructor(
