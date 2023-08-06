@@ -73,7 +73,7 @@ export class AuthService {
     const user = await this.usersService.findUserById(userId);
     console.log(user + ' - ' + userId);
     if (!user) {
-      throw AppException.forbiddenException(AppExceptionBody.userNotFound());
+      throw AppException.forbiddenException(AppExceptionBody.forbiddenAccess());
     }
 
     const tokens = await this.getTokens(user.id, user.email, userRole);

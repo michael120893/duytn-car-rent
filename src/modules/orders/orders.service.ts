@@ -73,13 +73,13 @@ export class OrdersService {
     });
     if (order) return order;
 
-    throw AppException.notFoundException(AppExceptionBody.orderNotFound());
+    throw AppException.notFoundException(AppExceptionBody.objectNotFound());
   }
 
   async updateOrder(id: number, updateOrder: UpdateOrderStatusDto) {
     const order = await this.findOrder(id);
     if (!order) {
-      throw AppException.notFoundException(AppExceptionBody.orderNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
     await this.orderModel.update(
       {
@@ -97,21 +97,21 @@ export class OrdersService {
       where: { id: createPlaceOrderDto.car_id },
     });
     if (!car) {
-      throw AppException.notFoundException(AppExceptionBody.carNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
 
     const pickupCity = await this.cityModel.findOne({
       where: { id: createPlaceOrderDto.pick_up_city_id },
     });
     if (!pickupCity) {
-      throw AppException.notFoundException(AppExceptionBody.cityNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
 
     const dropoffCity = await this.cityModel.findOne({
       where: { id: createPlaceOrderDto.drop_off_city_id },
     });
     if (!dropoffCity) {
-      throw AppException.notFoundException(AppExceptionBody.cityNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
 
     let coupon: Coupon | null;
@@ -329,7 +329,7 @@ export class OrdersService {
       },
     });
     if (!car) {
-      throw AppException.notFoundException(AppExceptionBody.carNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
 
     let subtotal = car.price;

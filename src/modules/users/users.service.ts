@@ -81,7 +81,7 @@ export class UsersService {
   async updateUser(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findUserById(id);
     if (!user) {
-      throw AppException.notFoundException(AppExceptionBody.userNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
 
     await this.userModel.update(
@@ -100,7 +100,7 @@ export class UsersService {
   async removeUser(id: number) {
     const user = await this.findUserById(id);
     if (!user) {
-      throw AppException.notFoundException(AppExceptionBody.userNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
 
     this.userModel.destroy({

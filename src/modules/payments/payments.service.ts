@@ -16,7 +16,7 @@ export class PaymentsService {
   async updatePaymentStatus(updatePayment: UpdatePaymentStatusDto) {
     const order = await this.orderModel.findByPk(updatePayment.order_id);
     if (!order) {
-      throw AppException.notFoundException(AppExceptionBody.orderNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
     await this.orderModel.update(
       {

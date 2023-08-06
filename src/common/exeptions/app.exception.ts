@@ -44,19 +44,19 @@ export interface AppExceptionDetail {
 }
 
 export class AppExceptionBody {
-  static carNotFound(): AppExceptionOptions {
+  static objectNotFound(message?: string): AppExceptionOptions {
     return {
-      error_id: 'CAR-0001',
-      code: 'NOT_FOUND',
+      error_id: 'SYS-0404',
+      code: 'OBJECT_NOT_FOUND',
       title: 'An error has occurred',
-      message: 'Car id is not found',
+      message: message ?? `I can't find a resource.`,
       errors: [],
     };
   }
 
   static carNotAvailable(): AppExceptionOptions {
     return {
-      error_id: 'CAR-0002',
+      error_id: 'CAR-0001',
       code: 'BAD_REQUEST',
       title: 'An error has occurred',
       message: 'Car id is not available for rent',
@@ -64,19 +64,10 @@ export class AppExceptionBody {
     };
   }
 
-  static cityNotFound(): AppExceptionOptions {
-    return {
-      error_id: 'CITY-0001',
-      code: 'NOT_FOUND',
-      title: 'An error has occurred',
-      message: 'City id is not found',
-      errors: [],
-    };
-  }
 
   static invalidEmailOrPassword(): AppExceptionOptions {
     return {
-      error_id: 'USER-0001',
+      error_id: 'USR-0001',
       code: 'INVALID_PARAMETER',
       title: 'An error has occurred',
       message: 'Invalid email or password',
@@ -94,19 +85,9 @@ export class AppExceptionBody {
     };
   }
 
-  static userNotFound(): AppExceptionOptions {
-    return {
-      error_id: 'USER-0002',
-      code: 'OBJECT_NOT_FOUND',
-      title: 'An error has occurred',
-      message: 'User id is not found',
-      errors: [],
-    };
-  }
-
   static userExists(): AppExceptionOptions {
     return {
-      error_id: 'USER-0003',
+      error_id: 'USR-0003',
       code: 'CONFLICT',
       title: 'An error has occurred',
       message: 'User already exists',
@@ -116,21 +97,11 @@ export class AppExceptionBody {
 
   static invalidPassword(): AppExceptionOptions {
     return {
-      error_id: 'USER-0004',
+      error_id: 'USR-0004',
       code: 'INVALID_PARAMETER',
       title: 'An error has occurred',
       message:
         'The password should fulfill the following criteria: At least 8 characters long, contain at least one uppercase letter, contain at least one lowercase letter, contain at least one digit, and can optionally contain special characters.',
-      errors: [],
-    };
-  }
-
-  static orderNotFound(): AppExceptionOptions {
-    return {
-      error_id: 'ORDER-0001',
-      code: 'NOT_FOUND',
-      title: 'An error has occurred',
-      message: 'Order id is not found',
       errors: [],
     };
   }
@@ -169,7 +140,7 @@ export class AppExceptionBody {
   static couponIsExpired(): AppExceptionOptions {
     return {
       error_id: 'COU-0001',
-      code: 'NOT_FOUND',
+      code: 'BAD_REQUEST',
       title: 'An error has occurred',
       message: 'Coupon is expired.',
       errors: [],

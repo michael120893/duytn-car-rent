@@ -122,13 +122,13 @@ export class CarsService {
     });
     if (car) return car;
 
-    throw AppException.notFoundException(AppExceptionBody.carNotFound());
+    throw AppException.notFoundException(AppExceptionBody.objectNotFound());
   }
 
   async updateCar(id: number, updateCarDto: UpdateCarDto) {
     const car = await this.findCarById(id);
     if (!car) {
-      throw AppException.notFoundException(AppExceptionBody.carNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
 
     await this.carsModel.update(
@@ -153,7 +153,7 @@ export class CarsService {
   async removeCar(id: number) {
     const car = await this.findCarById(id);
     if (!car) {
-      throw AppException.notFoundException(AppExceptionBody.carNotFound());
+      throw AppException.notFoundException(AppExceptionBody.objectNotFound());
     }
     this.carsModel.destroy({
       where: {
