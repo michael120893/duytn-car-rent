@@ -1,8 +1,10 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validate } from 'class-validator';
-import { AppException } from '../../customs/custom.exception';
-import { ExceptionCode } from 'src/common/enums/exception_code';
+import {
+  AppException,
+  AppExceptionBody,
+} from 'src/common/exeptions/app.exception';
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform<any> {
@@ -15,17 +17,14 @@ export class CustomValidationPipe implements PipeTransform<any> {
     const object = plainToClass(metatype, value);
     const errors = await validate(object);
     if (errors.length > 0) {
-      throw AppException.badRequestException({
-        code: 'IS0001',
-        title: 'System error',
-        message:
-          'An internal server error has occurred. If the problem persists, please contact us.',
-        errors: errors.map((error) => ({
-          code: ExceptionCode.VALIDATION_CODE,
-          field: 'error.property',
-          message: 'Object.values(error.constraints).toString()',
-        })),
-      });
+      const details = errors.map((error, index) => ({
+        error_id: `INV-000${index}`,
+        field: error.property,
+        message: Object.values(error.constraints).toString(),
+      }));
+      throw AppException.badRequestException(
+        AppExceptionBody.invalidParamater(details),
+      );
     }
 
     return value;
