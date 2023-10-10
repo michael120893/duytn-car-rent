@@ -7,12 +7,14 @@ import { QueueService } from './queues.service';
 
 @Module({
   imports: [
-    BullModule.forRoot({
-      redis: {
-        host: REDIS_HOST,
-        port: REDIS_PORT,
-      },
-    }),
+    // BullModule.forRoot({
+    //   redis: {
+    //     host: REDIS_HOST,
+    //     port: REDIS_PORT,
+    //     username: 'car-rent', // new property
+    //   password: 'qejkdl6WTeoslHeUDGQ0EQzVTLaEUhA4', // new property
+    //   },
+    // }),
     BullModule.registerQueue({
       name: EMAIL_QUEUE,
     }),

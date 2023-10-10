@@ -11,6 +11,9 @@ import { CacheRedisService } from './cache.redis.service';
         store: redisStore,
         host: REDIS_HOST,
         port: REDIS_PORT,
+        username: 'car-rent', // new property
+      password: 'qejkdl6WTeoslHeUDGQ0EQzVTLaEUhA4', // new property
+      no_ready_check: true, // new property
       }),
     }),
   ],

@@ -8,8 +8,8 @@ const DATABASE_PASSWORD: string = process.env.DATABASE_PASSWORD;
 const DATABASE_NAME: string = process.env.DATABASE_NAME;
 const DATABASE_HOST: string = process.env.DATABASE_HOST;
 const DATABASE_PORT: number = parseInt(process.env.DATABASE_PORT);
-const REDIS_HOST: string = process.env.REDIS_HOST;
-const REDIS_PORT: number = parseInt(process.env.REDIS_PORT);
+const REDIS_HOST: string = 'redis-12259.c252.ap-southeast-1-1.ec2.cloud.redislabs.com';
+const REDIS_PORT: number = 12259;
 
 const JWT_ACCESS_SECRET: string = process.env.JWT_ACCESS_SECRET;
 const JWT_REFRESH_SECRET: string = process.env.JWT_REFRESH_SECRET;
